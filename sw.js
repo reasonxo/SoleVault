@@ -1,5 +1,5 @@
 // Network-first navigation: updates are fetched from the stable URL.
-const CACHE = 'solevault-site-v1';
+const CACHE = 'solevault-site-v21-2';
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => { event.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', event => {
