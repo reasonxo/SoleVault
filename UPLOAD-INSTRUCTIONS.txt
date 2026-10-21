@@ -1,0 +1,1 @@
+Upload index.html, manifest.webmanifest, sw.js, and every model-*-part-*.js to the ROOT of your GitHub SoleVault repository. Your two icon files are already uploaded. Do NOT upload personal JSON backups. Commit files in batches if needed. Then enable GitHub Pages from main / root.

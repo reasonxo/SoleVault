@@ -1,0 +1,1086 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>SOLEVAULT — Collector Edition</title><style>*{box-sizing:border-box}body{margin:0;background:#080d0a;color:#f4f9ee;font-family:system-ui,Arial;overflow-x:hidden}.shell{max-width:800px;margin:auto;padding:20px}header{display:flex;align-items:center;justify-content:space-between;font-weight:900}header b{font-size:23px;letter-spacing:-1px}header b span,.lime{color:#baff43}header small{font-size:10px;letter-spacing:2px;color:#abb7a5}h1{font-size:clamp(36px,9vw,64px);line-height:1.02;letter-spacing:-2px;margin:32px 0 12px}p{color:#b7c2b3;line-height:1.5}.stage{height:min(58vh,460px);min-height:320px;position:relative;margin:12px -20px;background:radial-gradient(ellipse at 50% 65%,#233729 0%,#080e0c 75%);overflow:hidden;touch-action:none}.stage canvas{display:block;width:100%;height:100%}.hint{position:absolute;left:0;right:0;bottom:13px;text-align:center;color:#d2f5b6;font-size:11px;letter-spacing:2px;pointer-events:none}.tag{text-align:center;color:#baff43;font-weight:900;letter-spacing:3px;margin:8px}.controls{display:flex;gap:12px;align-items:center;justify-content:space-between}.controls button{min-width:70px}button{border:1px solid #547148;border-radius:13px;background:#19271b;color:white;font-weight:800;font-size:17px;padding:15px;cursor:pointer}button:active{transform:scale(.98)}button.primary{background:#baff43;color:#101a0d;border:none;width:100%;padding:20px;margin:20px 0 10px}button:disabled{opacity:.4}.fine{font-size:12px;text-align:center;color:#91a08d}.status{text-align:center;min-height:32px;font-weight:800}.overlay{display:none;position:fixed;inset:0;background:#080d0af2;z-index:5;align-items:center;justify-content:center;flex-direction:column;padding:25px;text-align:center}.overlay.show{display:flex}.overlay h2{font-size:32px;margin:10px}.overlay .visual{width:min(80vw,310px);height:230px;display:grid;place-items:center;position:relative}.shoe{font-size:120px;filter:drop-shadow(0 12px 18px #baff4377);animation:rise .9s cubic-bezier(.15,.8,.2,1) both}.boxart{font-size:130px;animation:burst .65s ease both}.overlay .primary{max-width:350px}@keyframes rise{from{transform:translateY(110px) rotate(-20deg) scale(.4);opacity:0}to{transform:translateY(0) rotate(-8deg) scale(1);opacity:1}}@keyframes burst{to{transform:translateY(-100px) rotate(-25deg);opacity:0}}#error{display:none;color:#ffc0a5;background:#41261c;padding:15px;border-radius:12px;margin:10px 0}.loading{position:absolute;inset:0;display:grid;place-items:center;color:#baff43;font-weight:900;letter-spacing:2px;pointer-events:none}
+.overlay{background:radial-gradient(ellipse at 50% 45%,#27441e,#090d0a 65%)}
+.overlay .visual{width:min(96vw,490px);height:min(52vh,420px);min-height:300px;overflow:hidden;touch-action:none}
+#reveal3d{position:absolute;inset:0}#reveal3d canvas{width:100%;height:100%;display:block}
+#revealHint{position:absolute;bottom:10px;left:0;right:0;color:#baff43;font-size:11px;letter-spacing:2px;pointer-events:none}
+#revealHint.hidden{display:none}.overlay h2{color:#baff43;text-shadow:0 0 22px #baff4355}
+@media(prefers-reduced-motion:reduce){.shoe,.boxart{animation:none}}
+
+/* V10 cinematic direction: additive effects that do not touch working Three.js carousel */
+.overlay{overflow:hidden;isolation:isolate;transition:background .5s}
+.overlay:before{content:"";position:absolute;inset:-50%;background:conic-gradient(from 0deg,transparent 0deg,#baff4317 30deg,transparent 60deg,#baff4310 110deg,transparent 170deg);animation:spotRotate 11s linear infinite;pointer-events:none}
+#cinematicFX{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.fx-flash{position:absolute;inset:0;background:#eaffc9;opacity:0}
+.fx-rays{position:absolute;inset:-60%;background:repeating-conic-gradient(from 0deg at 50% 50%,#baff4318 0deg 4deg,transparent 5deg 19deg);opacity:0;animation:spotRotate 13s linear infinite}
+.fx-particles{position:absolute;inset:0;opacity:0;background-image:radial-gradient(circle,#dfff9b 2px,transparent 3px),radial-gradient(circle,#baff43 2px,transparent 3px),radial-gradient(circle,#ffffff 1px,transparent 2px);background-size:61px 87px,93px 113px,47px 71px;background-position:10px 20px,45px 35px,4px 10px;transform:scale(.7)}
+#cinematicFX.charging .fx-rays{opacity:.7}#cinematicFX.charging .fx-particles{opacity:.45;animation:chargePulse .35s infinite alternate}
+#cinematicFX.burst .fx-flash{animation:cameraFlash .9s ease-out both}
+#cinematicFX.burst .fx-rays{opacity:.95;animation:spotRotate 3s linear infinite}
+#cinematicFX.burst .fx-particles{opacity:1;animation:particleBurst 2s ease-out both}
+.cinema-top{z-index:3;position:relative;color:#caff70;letter-spacing:3px;font-weight:1000;font-size:clamp(13px,3vw,19px);text-shadow:0 0 18px #baff43;animation:cinemaBreathe 1.1s ease-in-out infinite alternate}
+.overlay .visual{z-index:2}.overlay h2,.overlay p,.overlay button,.rarity-tag{z-index:3;position:relative}
+.rarity-tag{border:1px solid #caff70;color:#caff70;padding:8px 18px;border-radius:100px;font-size:11px;font-weight:900;letter-spacing:3px;box-shadow:0 0 24px #baff4340}
+.rarity-tag[hidden]{display:none}
+@keyframes spotRotate{to{transform:rotate(360deg)}}
+@keyframes cameraFlash{0%,8%{opacity:0}15%{opacity:.95}28%{opacity:0}38%{opacity:.6}55%,100%{opacity:0}}
+@keyframes particleBurst{0%{transform:scale(.3) rotate(-10deg);opacity:0}20%{opacity:1}100%{transform:scale(1.6) rotate(15deg);opacity:.4}}
+@keyframes chargePulse{to{transform:scale(1.1);opacity:1}}
+@keyframes cinemaBreathe{to{opacity:.65;text-shadow:0 0 30px #baff43}}
+@media(prefers-reduced-motion:reduce){.overlay:before,.fx-rays,.fx-particles,.cinema-top{animation:none!important}}
+
+/* V16: rarity-specific MyTEAM-inspired cinematic treatment */
+.overlay{--reveal:#baff43;--reveal-soft:#baff4330}
+.overlay.rarity-common{--reveal:#baff43;--reveal-soft:#baff4330}
+.overlay.rarity-epic{--reveal:#c18aff;--reveal-soft:#a65cff55}
+.overlay.rarity-legendary{--reveal:#ffd16c;--reveal-soft:#ffae2355}
+.overlay.rarity-epic,.overlay.rarity-legendary{background:radial-gradient(ellipse at 50% 42%,var(--reveal-soft),#070a0b 68%)}
+.overlay.rarity-epic .rarity-tag,.overlay.rarity-legendary .rarity-tag{color:var(--reveal);border-color:var(--reveal);box-shadow:0 0 35px var(--reveal-soft);text-shadow:0 0 14px var(--reveal)}
+.overlay.rarity-epic .cinema-top,.overlay.rarity-legendary .cinema-top,.overlay.rarity-epic h2,.overlay.rarity-legendary h2{color:var(--reveal);text-shadow:0 0 24px var(--reveal-soft)}
+.overlay.rarity-epic .fx-rays,.overlay.rarity-legendary .fx-rays{background:repeating-conic-gradient(from 0deg at 50% 50%,var(--reveal-soft) 0deg 4deg,transparent 5deg 19deg)}
+.overlay.rarity-epic .fx-flash,.overlay.rarity-legendary .fx-flash{background:var(--reveal)}
+#cinematicFX.charging{background:radial-gradient(ellipse at 50% 50%,transparent 8%,#000b 95%)}
+.overlay.reveal-shake .visual{animation:revealShake .52s cubic-bezier(.2,.9,.4,1) both}
+@keyframes revealShake{0%,100%{transform:translate(0,0)}15%{transform:translate(-7px,4px)}30%{transform:translate(6px,-4px)}45%{transform:translate(-5px,2px)}65%{transform:translate(3px,-2px)}}
+#revealRating{position:relative;z-index:4;font-size:clamp(34px,10vw,60px);font-weight:1000;letter-spacing:2px;color:var(--reveal);text-shadow:0 0 24px var(--reveal-soft);height:0;opacity:0;transition:opacity .3s,height .3s}
+.overlay.rating-visible #revealRating{height:68px;opacity:1}
+#revealRating span{font-size:11px;display:block;letter-spacing:4px;margin-top:-8px}
+@media(prefers-reduced-motion:reduce){.overlay.reveal-shake .visual{animation:none}}
+
+/* V18.6: bold regular letters collide with diagonal lightning */
+/* V18.4: cinematic SV store ident and anticipation cut */
+#svIdent{position:fixed;inset:0;z-index:40;background:#020403;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .08s ease,visibility .08s}
+#svIdent.active{opacity:1;visibility:visible}
+#svIdent .sv-emblem{position:relative;width:min(76vw,280px);height:170px;display:grid;place-items:center;isolation:isolate}
+#svIdent .sv-emblem svg{width:100%;height:100%;overflow:visible}
+#svIdent .sv-s,#svIdent .sv-v{transform-box:fill-box;transform-origin:center;opacity:0}
+#svIdent.active .sv-s{animation:svStrikeS 2.4s cubic-bezier(.18,.8,.18,1) both}
+#svIdent.active .sv-v{animation:svStrikeV 2.4s cubic-bezier(.18,.8,.18,1) both}
+#svIdent .sv-spark{opacity:0}
+#svIdent.active .sv-spark{animation:svSpark 2.4s both}
+#svIdent .sv-impact{position:absolute;inset:-60px;background:radial-gradient(circle,#f4ffd9 0%,#baff4388 12%,transparent 53%);opacity:0;pointer-events:none;mix-blend-mode:screen}
+#svIdent.active .sv-impact{animation:svImpact 2.4s both}
+@keyframes svStrikeS{0%{opacity:0;transform:translate(-185px,-115px) rotate(-30deg) scale(.65);filter:blur(10px)}45%{opacity:1;filter:blur(0)}64%{transform:translate(8px,5px) rotate(3deg) scale(1.12)}76%{transform:translate(0,0) rotate(0) scale(1)}100%{opacity:1;transform:translate(0,0) scale(1)}}
+@keyframes svStrikeV{0%{opacity:0;transform:translate(180px,110px) rotate(25deg) scale(.65);filter:blur(10px)}45%{opacity:1;filter:blur(0)}64%{transform:translate(-8px,-5px) rotate(-3deg) scale(1.12)}76%{transform:translate(0,0) rotate(0) scale(1)}100%{opacity:1;transform:translate(0,0) scale(1)}}
+@keyframes svSpark{0%,55%{opacity:0;stroke-dasharray:220;stroke-dashoffset:220}62%{opacity:1;stroke-dashoffset:0;stroke-width:10}76%{opacity:1;stroke-dashoffset:0}100%{opacity:0;stroke-dashoffset:0}}
+@keyframes svImpact{0%,56%{opacity:0;transform:scale(.15)}66%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.7)}}
+#svIdent .sv-wordmark{font-weight:1000;letter-spacing:7px;font-size:clamp(20px,6vw,32px);color:white;text-shadow:0 0 20px #baff4388;animation:svTextIn .7s 1.85s both}
+#svIdent .sv-wordmark b{color:#baff43}
+#svIdent .sv-caption{color:#91a78d;letter-spacing:5px;font-size:10px;font-weight:800;animation:svTextIn .7s 2.05s both}
+#svIdent:after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 48%,#baff431a 50%,transparent 52%);background-size:100% 12px;opacity:.25;pointer-events:none}
+.overlay.box-tremor .visual{animation:svBoxTremor .16s linear infinite}
+@keyframes svBoxTremor{0%{transform:translate(-3px,2px) rotate(-.6deg)}25%{transform:translate(3px,-2px) rotate(.6deg)}50%{transform:translate(-2px,-2px)}75%{transform:translate(2px,3px)}}
+@keyframes svLogoPop{0%{opacity:0;transform:rotate(0deg) scale(.2);filter:blur(12px)}65%{opacity:1;transform:rotate(50deg) scale(1.15);filter:blur(0)}100%{transform:rotate(45deg) scale(1)}}
+@keyframes svTextIn{from{opacity:0;transform:translateY(18px);letter-spacing:12px}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.overlay.box-tremor .visual,#svIdent .sv-s,#svIdent .sv-v,#svIdent .sv-spark,#svIdent .sv-impact,#svIdent .sv-wordmark,#svIdent .sv-caption{animation:none}}
+
+/* V18.7: full blackout and unmistakable logo hold */
+#svIdent{z-index:9999;background:#000;overflow:hidden}
+#svIdent.active{animation:svBlackout 3s both}
+#svIdent.active .sv-emblem{filter:drop-shadow(0 0 22px #baff4370)}
+#svIdent.active .sv-wordmark{animation:svTextIn .7s 1.85s both}
+#svIdent.active .sv-caption{animation:svTextIn .7s 2.05s both}
+#svIdent .sv-wordmark,#svIdent .sv-caption{opacity:0;animation-play-state:paused}
+@keyframes svBlackout{0%,88%{background:#000}93%{background:#baff43}96%{background:#f6ffe9}100%{background:#000}}
+#svIdent.active .sv-spark{filter:drop-shadow(0 0 12px #baff43)}
+
+/* V18.8: electric collision, visible shockwave, and impact strobe */
+#svIdent .sv-bolt,#svIdent .sv-branch{opacity:0;stroke-dasharray:360;stroke-dashoffset:360;filter:drop-shadow(0 0 5px #eaffbb) drop-shadow(0 0 16px #baff43)}
+#svIdent.active .sv-bolt{animation:svBolt 3s linear both}
+#svIdent.active .sv-branch{animation:svBranch 3s linear both}
+#svIdent .sv-shockwave{position:absolute;left:50%;top:50%;width:85px;height:85px;margin:-42.5px;border:4px solid #dfff9a;border-radius:50%;box-shadow:0 0 18px #baff43,0 0 42px #baff43,inset 0 0 15px #baff43;opacity:0;pointer-events:none}
+#svIdent.active .sv-shockwave{animation:svWave 3s ease-out both}
+#svIdent .sv-strobe{position:fixed;inset:0;background:#eaffd5;opacity:0;pointer-events:none;mix-blend-mode:screen}
+#svIdent.active .sv-strobe{animation:svStrobe 3s both}
+@keyframes svBolt{0%,47%{opacity:0;stroke-dashoffset:360}51%{opacity:1;stroke-dashoffset:0}54%{opacity:.2;stroke-dashoffset:0}56%,62%{opacity:1;stroke-dashoffset:0}68%,100%{opacity:0;stroke-dashoffset:0}}
+@keyframes svBranch{0%,50%{opacity:0;stroke-dashoffset:360}53%,59%{opacity:1;stroke-dashoffset:0}64%,100%{opacity:0;stroke-dashoffset:0}}
+@keyframes svWave{0%,53%{opacity:0;transform:translate(-50%,-50%) scale(.2)}56%{opacity:1;transform:translate(-50%,-50%) scale(.7)}76%{opacity:.6;transform:translate(-50%,-50%) scale(4)}91%,100%{opacity:0;transform:translate(-50%,-50%) scale(6)}}
+@keyframes svStrobe{0%,50%,53%,57%,61%,100%{opacity:0}51%,55%{opacity:.78}59%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){#svIdent.active .sv-bolt,#svIdent.active .sv-branch,#svIdent.active .sv-shockwave,#svIdent.active .sv-strobe{animation:none}}
+
+/* V18.9: a full-screen lightning discharge, delayed logo impact and clean one-second hold */
+#svIdent .sv-screen-bolt{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:5;opacity:0;filter:drop-shadow(0 0 8px #f2ffdb) drop-shadow(0 0 22px #baff43)}
+#svIdent .sv-screen-bolt .main{fill:none;stroke:#fafff4;stroke-width:5;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:800;stroke-dashoffset:800}
+#svIdent .sv-screen-bolt .aura{fill:none;stroke:#baff43;stroke-width:13;stroke-linejoin:bevel;stroke-dasharray:800;stroke-dashoffset:800;opacity:.8}
+#svIdent .sv-screen-bolt .twig{fill:none;stroke:#dfff9d;stroke-width:2;stroke-dasharray:300;stroke-dashoffset:300}
+#svIdent.active .sv-screen-bolt{animation:svScreenVisible 3.7s linear both}
+#svIdent.active .sv-screen-bolt .main,#svIdent.active .sv-screen-bolt .aura{animation:svDrawStrike 3.7s ease-out both}
+#svIdent.active .sv-screen-bolt .twig{animation:svDrawTwig 3.7s ease-out both}
+#svIdent.active .sv-s{animation:svFlyS 3.7s cubic-bezier(.2,.7,.2,1) both}
+#svIdent.active .sv-v{animation:svFlyV 3.7s cubic-bezier(.2,.7,.2,1) both}
+#svIdent.active .sv-spark{animation:svSpark 3.7s both}
+#svIdent.active .sv-impact{animation:svImpact 3.7s both}
+#svIdent.active .sv-bolt{animation:svBolt 3.7s linear both}
+#svIdent.active .sv-branch{animation:svBranch 3.7s linear both}
+#svIdent.active .sv-shockwave{animation:svWave19 3.7s ease-out both}
+#svIdent.active .sv-strobe{animation:svStrobe19 3.7s both}
+#svIdent.active{animation:svBlackout19 3.7s both}
+#svIdent.active .sv-wordmark{animation:svTextIn .5s 2.3s both}
+#svIdent.active .sv-caption{animation:svTextIn .5s 2.5s both}
+@keyframes svFlyS{0%{opacity:0;transform:translate(-270px,-170px) rotate(-22deg) scale(.7)}22%{opacity:1}43%{transform:translate(-35px,-23px) rotate(-4deg) scale(1)}49%{transform:translate(7px,3px) scale(1.1)}55%,100%{opacity:1;transform:translate(0,0) scale(1)}}
+@keyframes svFlyV{0%{opacity:0;transform:translate(270px,170px) rotate(22deg) scale(.7)}22%{opacity:1}43%{transform:translate(35px,23px) rotate(4deg) scale(1)}49%{transform:translate(-7px,-3px) scale(1.1)}55%,100%{opacity:1;transform:translate(0,0) scale(1)}}
+@keyframes svScreenVisible{0%,40%{opacity:0}44%,54%{opacity:1}58%,100%{opacity:0}}
+@keyframes svDrawStrike{0%,39%{stroke-dashoffset:800}51%,100%{stroke-dashoffset:0}}
+@keyframes svDrawTwig{0%,45%{stroke-dashoffset:300}53%,100%{stroke-dashoffset:0}}
+@keyframes svWave19{0%,49%{opacity:0;transform:translate(-50%,-50%) scale(.1)}53%{opacity:1;transform:translate(-50%,-50%) scale(.6)}75%{opacity:.7;transform:translate(-50%,-50%) scale(5)}86%,100%{opacity:0;transform:translate(-50%,-50%) scale(8)}}
+@keyframes svStrobe19{0%,48%,51%,55%,100%{opacity:0}49%{opacity:.94}53%{opacity:.5}}
+@keyframes svBlackout19{0%,92%{background:#000}96%{background:#eaffc9}100%{background:#000}}
+@media(prefers-reduced-motion:reduce){#svIdent.active .sv-screen-bolt,#svIdent.active .sv-screen-bolt *{animation:none!important}}
+
+/* V18.10: electric arcs stay visible during collision, rather than a single-frame slash. */
+#svIdent .sv-screen-bolt{z-index:12;filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 26px #baff43)}
+#svIdent .sv-screen-bolt .main{stroke-width:6}
+#svIdent .sv-screen-bolt .aura{stroke-width:17}
+#svIdent .sv-screen-bolt .twig{stroke-width:3.5}
+#svIdent .sv-screen-bolt .electric-branch{fill:none;stroke:#f0ffd9;stroke-width:2.5;stroke-dasharray:500;stroke-dashoffset:500}
+#svIdent.active .sv-screen-bolt{animation:svElectricVisibility 3.7s linear both}
+#svIdent.active .sv-screen-bolt .main,#svIdent.active .sv-screen-bolt .aura{animation:svElectricDraw 3.7s linear both}
+#svIdent.active .sv-screen-bolt .twig,#svIdent.active .sv-screen-bolt .electric-branch{animation:svElectricBranches 3.7s linear both}
+#svIdent.active .sv-strobe{animation:svElectricStrobe 3.7s both}
+@keyframes svElectricVisibility{0%,39%{opacity:0}42%{opacity:1}45%{opacity:.3}47%{opacity:1}51%{opacity:.55}54%{opacity:1}58%{opacity:.75}63%{opacity:1}69%{opacity:.18}72%,100%{opacity:0}}
+@keyframes svElectricDraw{0%,39%{stroke-dashoffset:800}48%,100%{stroke-dashoffset:0}}
+@keyframes svElectricBranches{0%,43%{stroke-dashoffset:500}53%,100%{stroke-dashoffset:0}}
+@keyframes svElectricStrobe{0%,44%,47%,51%,55%,61%,100%{opacity:0}45%{opacity:.3}49%{opacity:.9}53%{opacity:.35}58%{opacity:.15}}
+@media(prefers-reduced-motion:reduce){#svIdent.active .sv-screen-bolt .electric-branch{animation:none}}
+
+/* V19: Premium sneaker vault. Existing unboxing and carousel remain unchanged. */
+#vaultPanel{position:relative;overflow:hidden;background:linear-gradient(155deg,#152319 0%,#070d0a 64%,#111a12 100%);border:1px solid #506d3b!important;border-radius:22px;padding:18px!important;box-shadow:inset 0 1px 0 #baff4329,0 18px 50px #0008}
+#vaultPanel:before{content:"";position:absolute;top:-90px;right:-90px;width:240px;height:240px;background:radial-gradient(circle,#baff431c,transparent 68%);pointer-events:none}
+#vaultPanel .vault-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:12px}
+#vaultPanel .vault-kicker{font-size:10px;font-weight:900;letter-spacing:.24em;color:#baff43}
+#vaultPanel .vault-title{font-size:27px;line-height:1.05;font-weight:1000;color:#f6fff0;letter-spacing:-.04em;margin:5px 0 0}
+#vaultPanel .vault-count{font-size:11px;letter-spacing:.09em;font-weight:900;color:#baff43;background:#baff4318;border:1px solid #baff4355;padding:9px 10px;border-radius:30px;white-space:nowrap}
+.vault-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0 16px}
+.vault-stat{background:#030805a8;border:1px solid #4e6e394a;border-radius:13px;padding:11px 8px;min-width:0}
+.vault-stat strong{display:block;color:white;font-size:19px;font-weight:950;line-height:1.2}
+.vault-stat span{font-size:9px;color:#a8bba4;text-transform:uppercase;letter-spacing:.07em}
+.vault-filterbar{display:flex;gap:7px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none}
+.vault-filter{flex:0 0 auto;background:#111b13;color:#bed0b7;border:1px solid #43583c;border-radius:20px;padding:8px 12px;font-size:11px;font-weight:850;cursor:pointer}
+.vault-filter.active{background:#baff43;color:#0a1206;border-color:#baff43}
+#vaultList{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important}
+.vault-card{display:flex;flex-direction:column;position:relative;overflow:hidden;min-width:0;background:linear-gradient(150deg,#202c21,#0a110d 78%);color:white;border:1px solid #526746;border-radius:17px;padding:0;text-align:left;cursor:pointer;box-shadow:0 9px 20px #0005;transition:transform .15s,border-color .15s}
+.vault-card:active{transform:scale(.975)}
+.vault-card.legendary{border-color:#c9a34a;background:linear-gradient(150deg,#342c16,#100f0b 78%)}
+.vault-card.epic{border-color:#a779e4;background:linear-gradient(150deg,#251c33,#100e16 78%)}
+.vault-art{position:relative;height:132px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 85%,#baff4333,transparent 65%),linear-gradient(150deg,#1b2a1e,#0b120d);overflow:hidden}
+.vault-card.legendary .vault-art{background:radial-gradient(ellipse at 50% 80%,#eec15c55,transparent 65%),linear-gradient(150deg,#352914,#110e0a)}
+.vault-card.epic .vault-art{background:radial-gradient(ellipse at 50% 80%,#a779e455,transparent 65%),linear-gradient(150deg,#271c36,#110e18)}
+.vault-art:after{content:"";position:absolute;bottom:14px;width:75%;height:1px;background:linear-gradient(90deg,transparent,#baff4399,transparent)}
+.vault-art img{position:relative;z-index:1;max-width:100%;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 9px #000a)}
+.vault-art .vault-preview-loading{font-size:11px;letter-spacing:.1em;font-weight:900;color:#c1d8b4;text-align:center;padding:14px}
+.vault-card .vault-rarity{position:absolute;z-index:2;top:9px;left:9px;background:#071009d9;border:1px solid #baff4366;border-radius:20px;padding:5px 8px;color:#baff43;font-size:9px;font-weight:950;letter-spacing:.09em}
+.vault-card.legendary .vault-rarity{color:#ffd26e;border-color:#ffd26e99}
+.vault-card.epic .vault-rarity{color:#d6b2ff;border-color:#d6b2ff99}
+.vault-card-body{padding:11px 11px 12px;display:flex;flex-direction:column;gap:5px;flex:1}
+.vault-card-name{font-size:13px;font-weight:900;line-height:1.3;min-height:34px}
+.vault-card-meta{font-size:10px;color:#9db397;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vault-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:3px;margin-top:auto;padding-top:8px;border-top:1px solid #ffffff19}
+.vault-card-value{color:#cfff83;font-size:12px;font-weight:900}
+.vault-card-view{font-size:9px;color:#fff;font-weight:850}
+.vault-progress-track{height:6px;background:#1b2a1d;border-radius:20px;overflow:hidden;margin:7px 0 4px}
+.vault-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#5d9b29,#baff43);transition:width .4s}
+
+/* V19.1 Collector Passport */
+.collector-panel{border:1px solid #567e3d;border-radius:17px;background:linear-gradient(125deg,#1b2c17,#070e09);padding:15px;margin:13px 0;color:#eaf6e5}
+.collector-kicker{color:#baff43;font-size:10px;font-weight:900;letter-spacing:2px}
+.collector-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:9px 0;font-weight:900}
+.collector-head strong{font-size:24px;color:#baff43}.collector-head small{font-size:11px;color:#a4b9a1}
+.collector-meter{height:7px;background:#273626;border-radius:20px;overflow:hidden}.collector-meter>i{display:block;height:100%;background:#baff43;width:0;transition:width .35s}
+.collector-feature{display:flex;gap:12px;align-items:center;margin-top:14px;padding:10px;background:#080f0b;border:1px solid #314b2a;border-radius:12px}
+.collector-feature .vault-art{height:76px;width:98px;flex:0 0 98px;border-radius:8px;background:#1a2518;overflow:hidden}
+.collector-feature .vault-art img{width:100%;height:100%;object-fit:contain}
+.collector-feature b{font-size:13px}.collector-feature small{display:block;color:#9cad98;margin-top:4px}
+.collector-set{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #34432f;font-size:12px}
+.collector-set strong{color:#baff43}
+.vault-card-actions{display:flex;gap:5px;padding:0 9px 10px;position:relative;z-index:2}
+.vault-card-actions button{flex:1;min-width:0;padding:8px 4px;border:1px solid #607e4b;background:#172218;color:#d8f3c9;border-radius:9px;font-size:10px;font-weight:900;cursor:pointer}
+.vault-card-actions button.featured{background:#baff43;color:#10180a}
+.vault-card-wrap{min-width:0}.vault-card-wrap>.vault-card{width:100%;height:calc(100% - 39px)}
+
+/* V19.2: mobile-first Vault layout; no changes to the approved 3D carousel or reveal timing. */
+#vaultPanel{padding:clamp(14px,4vw,24px)!important}
+#vaultList{gap:14px!important}
+.vault-card-wrap{display:flex;flex-direction:column;border-radius:19px;overflow:hidden;background:#101b13;border:1px solid #415b3c;box-shadow:0 12px 25px #0005}
+.vault-card-wrap>.vault-card{height:auto;flex:1;border:0;border-radius:0;box-shadow:none}
+.vault-art{height:clamp(146px,43vw,225px)}
+.vault-art img{padding:5px;transform:scale(1.13)}
+.vault-card-body{padding:12px 12px 15px;gap:8px}
+.vault-card-name{font-size:clamp(13px,3.5vw,17px);min-height:38px}
+.vault-card-meta{font-size:10px;letter-spacing:.035em}
+.vault-card-actions{padding:0 9px 11px;gap:7px}
+.vault-card-actions button{padding:11px 4px;font-size:10px;min-height:41px}
+.collector-feature{min-width:0}.collector-feature>div:last-child{min-width:0;flex:1}
+#featuredName{display:block;line-height:1.3}#featuredMeta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Inspection only: separate the sneaker stage from all text and controls. */
+.overlay.vault-inspecting{padding:18px 16px max(20px,env(safe-area-inset-bottom));justify-content:flex-start;overflow-y:auto;gap:0}
+.overlay.vault-inspecting .cinema-top{font-size:12px;letter-spacing:2px;margin:7px 0 12px;flex:none}
+.overlay.vault-inspecting .visual{width:min(100%,520px);height:clamp(270px,48vh,490px);min-height:0;flex:none;border:1px solid #baff4345;border-radius:20px;background:radial-gradient(ellipse at 50% 70%,#385a2740,transparent 68%),#071009;box-shadow:inset 0 0 50px #baff4311;overflow:hidden}
+.overlay.vault-inspecting #revealHint{bottom:13px;font-size:10px;letter-spacing:1px}
+.overlay.vault-inspecting #revealRating{margin-top:15px;flex:none}
+.overlay.vault-inspecting #resultTitle{font-size:clamp(21px,6vw,31px);line-height:1.15;margin:10px 0 5px;max-width:520px}
+.overlay.vault-inspecting #resultSub{font-size:11px;line-height:1.5;margin:3px 0 12px;max-width:520px}
+.overlay.vault-inspecting #close{margin-top:8px;flex:none}
+/* In-page passport sheet replaces the blocking native alert. */
+#passportDialog{position:fixed;inset:0;z-index:30;background:#000b;display:none;align-items:flex-end;justify-content:center;padding:12px}
+#passportDialog.show{display:flex}
+.passport-sheet{background:linear-gradient(145deg,#1b2c1b,#070e0a);border:1px solid #baff4377;border-radius:22px;width:min(100%,480px);padding:22px;color:#effbe9;box-shadow:0 0 60px #000}
+.passport-kicker{font-size:10px;letter-spacing:2px;color:#baff43;font-weight:900}
+.passport-sheet h3{font-size:22px;line-height:1.15;margin:12px 0}
+.passport-line{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #ffffff1c;padding:11px 0;font-size:12px}
+.passport-line span:first-child{color:#a7b9a1}.passport-line strong{text-align:right;overflow-wrap:anywhere}
+.passport-sheet .passport-id{display:block;color:#baff43;overflow-wrap:anywhere;font-size:12px;margin:12px 0}
+.passport-sheet button{width:100%;background:#baff43;color:#091207;font-weight:900;border:0;border-radius:12px;padding:14px;margin-top:10px}
+@media(max-width:360px){#vaultList{gap:8px!important}.vault-card-actions{flex-wrap:wrap}.vault-card-actions button{font-size:9px}.vault-art{height:132px}}
+@media(min-width:700px){#vaultList{grid-template-columns:repeat(3,minmax(0,1fr))!important}#passportDialog{align-items:center}}
+</style><style id="v193styles">
+.svnav{display:flex;position:sticky;top:0;z-index:25;background:#071008f5;padding:10px;gap:7px;border:1px solid #29432c;border-radius:14px;margin:12px 0}.svnav button{flex:1;background:#162319;color:#cce6c7;border:1px solid #304934;border-radius:9px;padding:12px 4px;font-weight:800;font-size:12px}.svnav button.active{background:#baff43;color:#081008}.svpage{display:none}.svpage.active{display:block}.svpanel{border:1px solid #365b32;border-radius:16px;padding:18px;margin:14px 0;background:linear-gradient(140deg,#102013,#050a06)}.svpanel h2{color:#baff43;margin:0 0 10px}.svtiers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.svtier{background:#0b130d;border:1px solid #3a573b;border-radius:14px;padding:16px 10px;color:white;text-align:left;min-height:125px}.svtier strong{display:block;font-size:18px;margin-bottom:9px}.svtier small{display:block;color:#abc3a7;margin-top:6px}.svtier.chosen{border:2px solid #baff43;box-shadow:0 0 16px #baff4322}.svcta{display:block;width:100%;padding:15px;background:#baff43;color:#061006;border:0;border-radius:11px;font-weight:900;margin:14px 0}.svcta:disabled{opacity:.45}.svmuted{color:#a9bea6;font-size:12px;line-height:1.6}.svmoney{font-size:30px;color:#baff43;font-weight:900}.svnotice{min-height:20px;color:#e8d997;font-size:12px}
+</style><style id="sv194style">.svnav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.svnav button{font-size:clamp(9px,2.4vw,12px);padding:11px 3px}.earn-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.earn-head h2{margin:0}.quest{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:13px 0;border-bottom:1px solid #314334}.quest b{font-size:13px}.quest small{display:block;color:#aabda4;font-size:11px;margin-top:4px}.quest button{font-size:11px;padding:9px 12px;white-space:nowrap;background:#baff43;color:#11200c}.quest button:disabled{background:#233525;color:#91a88b}.match-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:18px 0}.match-card{aspect-ratio:3/4;min-width:0;border-radius:12px;background:linear-gradient(135deg,#223a26,#101a13);border:1px solid #476f41;display:grid;place-items:center;font-size:clamp(22px,8vw,45px);padding:0;transition:transform .15s}.match-card.faceup{background:#d5ff9c;color:#10190e;transform:rotateY(0)}.match-card.matched{background:#284f2e;border-color:#baff43;opacity:.72}.earn-banner{border:1px solid #53733c;background:#1b2d1d;border-radius:12px;padding:12px;color:#d6ffab;font-size:12px}.svpanel h2{letter-spacing:-.5px}@media(max-width:370px){.match-grid{gap:5px}.quest{gap:5px}.quest button{padding:8px 6px}}.heat-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:13px 0}.heat-mode{background:#18271b;color:#dcefd5;border:1px solid #496544;border-radius:10px;padding:12px 7px;text-align:left;font-weight:900;font-size:12px}.heat-mode small{display:block;color:#a8bca1;font-weight:500;margin-top:5px}.heat-mode.selected{border:2px solid #baff43;background:#28432b;color:#baff43}.heat-stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:10px 0;color:#c7e7bb;font-weight:800;font-size:12px}.match-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.match-card{font-size:clamp(18px,6vw,34px);position:relative;overflow:hidden}.match-card.faceup{box-shadow:inset 0 0 0 2px #9cce75}.match-card.matched{opacity:.8}.match-card .shoe-art{display:grid;place-items:center;gap:1px;font-size:clamp(21px,7vw,37px);line-height:1}.match-card .shoe-art small{font-size:9px;font-weight:900;letter-spacing:.2px}.match-card .shoe-art i{font-style:normal;filter:drop-shadow(1px 2px 1px #4a4a4a)}.heat-flawless{color:#ffe47a;font-weight:900}.heat-mode:disabled{opacity:.5}@media(max-width:380px){.match-grid{gap:4px}.match-card .shoe-art small{font-size:7px}} </style><style id="sv-chamber-style">
+#sv-carousel-slot{display:none}#sv-carousel-slot.chamber-ready{display:block}
+#sv-chamber{position:fixed;inset:0;z-index:999999;background:#020503;display:none;align-items:center;justify-content:center;overflow:hidden;color:#baff43;font-family:Arial,sans-serif}#sv-chamber.active{display:flex}#sv-chamber .ch-door{position:absolute;top:0;bottom:0;width:51%;background:repeating-linear-gradient(90deg,#0b110d,#1d2820 12%,#0c150e 24%);border:3px solid #496c39;box-shadow:inset 0 0 75px #000;transition:transform 1.05s cubic-bezier(.68,0,.22,1)}#sv-chamber .left{left:0;border-right:6px solid #a5ff39}#sv-chamber .right{right:0;border-left:6px solid #a5ff39}#sv-chamber.open .left{transform:translateX(-105%)}#sv-chamber.open .right{transform:translateX(105%)}#sv-chamber .ch-center{position:relative;z-index:2;text-align:center;text-shadow:0 0 20px #a5ff39;padding:24px;pointer-events:none}#sv-chamber .ch-center h2{font-size:clamp(32px,9vw,72px);letter-spacing:5px;margin:0}#sv-chamber .ch-center p{letter-spacing:3px;font-size:12px}#sv-chamber .ch-bolt{position:absolute;z-index:1;inset:0;opacity:0;background:repeating-linear-gradient(115deg,transparent 0 14%,#a5ff39 14.3%,transparent 14.7% 25%);filter:drop-shadow(0 0 15px #9cff25)}#sv-chamber.surge .ch-bolt{animation:chflash .18s 5 alternate}#sv-chamber.open .ch-center{opacity:0;transition:opacity .35s}#sv-chamber button{position:absolute;right:15px;top:15px;z-index:4;background:#1a2919;color:#dfffbb;border:1px solid #8edb55;border-radius:8px;padding:10px;display:none}#sv-chamber.active button{display:block}@keyframes chflash{from{opacity:0}to{opacity:.65}}
+</style><meta name="theme-color" content="#080d0a"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png"><script>if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script><script>window.SV_MODEL_PARTS=[[null, null, null], [null], [null, null, null], [null]];</script><script src="./model-1-part-1.js"></script><script src="./model-1-part-2.js"></script><script src="./model-1-part-3.js"></script><script src="./model-2-part-1.js"></script><script src="./model-3-part-1.js"></script><script src="./model-3-part-2.js"></script><script src="./model-3-part-3.js"></script><script src="./model-4-part-1.js"></script></head><body><div class="shell"><header><b>SOLE<span>VAULT</span></b><small>ARCADE / V19.9</small></header><nav class="svnav" aria-label="SOLEVAULT pages"><button type="button" data-page="home" class="active">HOME</button><button type="button" data-page="drops">DROP ZONE</button><button type="button" data-page="vault">MY VAULT</button><button type="button" data-page="arcade">ARCADE ⚡</button></nav><section class="svpage active" id="sv-home"><div class="svpanel"><h2>WELCOME TO SOLEVAULT.</h2><div class="svmuted">YOUR VIRTUAL BALANCE</div><div class="svmoney"><span class="sv-balance">0</span> SV</div><p class="svmuted">Earn free virtual SV daily, choose a drop tier, and build your sneaker collection.</p><button class="svcta" id="sv-daily">CLAIM DAILY 150 SV</button><div id="sv-daily-status" class="svnotice"></div></div><div class="svpanel"><h2>YOUR JOURNEY</h2><p class="svmuted">Your original Vault and collectible passports are preserved. Visit Drop Zone to open your next box.</p><button class="svcta" data-go="drops">ENTER DROP ZONE →</button><button class="svcta" data-go="vault" style="background:#233826;color:#baff43">VIEW MY VAULT →</button></div></section><section class="svpage" id="sv-arcade"><div class="svpanel"><div class="svmuted">PLAY • EARN • PROGRESS</div><h2>SOLEVAULT ARCADE</h2><div class="sv-arcade-tabs" role="group" aria-label="Arcade activities"><button type="button" class="selected" data-arcade-tab="heat">🔥 HEAT STACK</button><button type="button" data-arcade-tab="match">👟 SNEAKER MATCH</button><button type="button" data-arcade-tab="quests">⚡ DAILY CHALLENGES</button></div><div id="sv-arcade-progress" class="earn-banner" aria-live="polite">Play games to earn SV and Collector XP.</div></div><div id="sv-heat-pane"><div class="svpanel"><div class="svmuted">SOLEVAULT ARCADE • V19.5</div><h2>HEAT STACK 3.3 ⚡</h2><p class="svmuted">Classic for relaxed runs. No Mercy for faster stacks, boss rounds, locked boxes and rising pressure. Your best scores are saved on this device.</p><div class="svmoney"><span class="sv-balance">0</span> SV</div><div class="svnotice" id="sv-arcade-reward">Finish a run to earn virtual SV. Up to 150 SV per day from Heat Stack.</div><div class="svnotice" id="sv-arcade-records">No runs recorded yet.</div><iframe id="sv-arcade-frame" title="Heat Stack 3.3 game" loading="lazy" allow="autoplay" style="display:block;width:100%;height:880px;max-width:100%;border:1px solid #456c3c;border-radius:15px;background:#09110d" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no&quot;&gt;&lt;meta name=&quot;theme-color&quot; content=&quot;#0a100d&quot;&gt;&lt;title&gt;SOLEVAULT • HEAT STACK 3.3&lt;/title&gt;&lt;style&gt;
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0%,#1b3021,#080c0a 65%);color:#f4fff1;font:600 14px system-ui,Arial;touch-action:manipulation}header{padding:15px 14px 7px;text-align:center;letter-spacing:3px;color:#b5ff4d;font-weight:900}header small{display:block;color:#9aa79a;letter-spacing:1.5px;font-size:10px;margin-top:4px}.shell{max-width:510px;margin:auto;padding:0 10px 15px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:7px 0}.stat{background:#17231b;border:1px solid #2e4932;border-radius:10px;padding:8px 4px;text-align:center}.stat span{display:block;color:#92a58f;font-size:10px;letter-spacing:1px}.stat strong{font-size:19px;color:#e8ffe2}.stage{position:relative;border:2px solid #486c3b;border-radius:16px;overflow:hidden;background:#0b110d;box-shadow:0 0 24px #6cff341c;height:min(64vh,580px);min-height:340px}canvas{display:block;width:100%;height:100%;touch-action:none}.overlay{position:absolute;inset:0;background:#050a07dc;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px;z-index:5}.overlay h1{font-size:34px;color:#b5ff4d;line-height:1.05;margin:0 0 12px}.overlay p{max-width:290px;line-height:1.5;color:#c4d4c1}.hidden{display:none!important}button{font:900 14px system-ui;border:1px solid #64894d;border-radius:12px;background:#1d3220;color:#eaffd8;padding:13px 8px;cursor:pointer;touch-action:manipulation}button:active{transform:scale(.96);background:#3d6530}.primary{background:#b5ff4d;color:#101b0c;border:0;padding:14px 28px;font-size:16px}.controls{display:grid;grid-template-columns:1fr 1fr 1fr 1.25fr;gap:7px;margin-top:9px}.controls button{font-size:18px;min-height:58px}.controls .drop{background:#b5ff4d;color:#0c1b08}.tip{font-size:11px;color:#9eb49b;text-align:center;margin-top:10px;line-height:1.5}.bar{height:5px;border-radius:5px;background:#243626;overflow:hidden;margin:8px 0}.bar&gt;div{height:100%;background:#b5ff4d;width:0%;transition:width .2s}.toast{position:absolute;left:0;right:0;top:35%;text-align:center;font-size:26px;font-weight:1000;letter-spacing:2px;color:#b5ff4d;text-shadow:0 0 20px #b5ff4d;pointer-events:none;opacity:0;transition:opacity .15s}.toast.show{opacity:1}.mission{background:#16251a;border:1px solid #3a6436;border-radius:10px;padding:9px 12px;margin:8px 0;color:#d8f7d0;font-size:12px}.mission strong{color:#b5ff4d}.mission small{display:block;color:#9cb499;margin-top:4px}.bottom{display:flex;justify-content:space-between;gap:10px;margin-top:10px;color:#b5c9b0;font-size:11px} .bottom button{font-size:11px;padding:6px 10px} .modepick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.modepick .chosen{background:#b5ff4d;color:#101b0c;border-color:#b5ff4d}.err{color:#ff9b91;font-size:12px;padding:10px}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;div class=&quot;shell&quot;&gt;&lt;header&gt;SOLEVAULT &lt;span style=&quot;color:#fff&quot;&gt;//&lt;/span&gt; HEAT STACK&lt;small&gt;3.3 • NO MERCY MODE&lt;/small&gt;&lt;/header&gt;&lt;div class=&quot;stats&quot;&gt;&lt;div class=&quot;stat&quot;&gt;&lt;span&gt;SCORE&lt;/span&gt;&lt;strong id=&quot;score&quot;&gt;0&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;stat&quot;&gt;&lt;span&gt;LEVEL&lt;/span&gt;&lt;strong id=&quot;level&quot;&gt;1&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;stat&quot;&gt;&lt;span&gt;CHAIN&lt;/span&gt;&lt;strong id=&quot;chain&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;stat&quot;&gt;&lt;span&gt;BEST&lt;/span&gt;&lt;strong id=&quot;best&quot;&gt;0&lt;/strong&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;mission&quot;&gt;&lt;strong id=&quot;missionTitle&quot;&gt;LEVEL 1 • WARM UP&lt;/strong&gt;&lt;small id=&quot;missionProgress&quot;&gt;Clear 3 matches to advance • 0/3&lt;/small&gt;&lt;/div&gt;&lt;div class=&quot;mission&quot; id=&quot;bossBanner&quot; style=&quot;display:none;border-color:#ffc34b;color:#ffe9b1&quot;&gt;&lt;strong id=&quot;bossTitle&quot;&gt;BOSS ROUND&lt;/strong&gt;&lt;small id=&quot;bossProgress&quot;&gt;&lt;/small&gt;&lt;/div&gt;&lt;div class=&quot;modepick&quot;&gt;&lt;button id=&quot;classicMode&quot; class=&quot;chosen&quot;&gt;CLASSIC&lt;/button&gt;&lt;button id=&quot;mercyMode&quot;&gt;NO MERCY 😈&lt;/button&gt;&lt;/div&gt;&lt;div class=&quot;stage&quot; id=&quot;stage&quot;&gt;&lt;div id=&quot;toast&quot; class=&quot;toast&quot;&gt;&lt;/div&gt;&lt;div class=&quot;overlay&quot; id=&quot;overlay&quot;&gt;&lt;h1 id=&quot;headline&quot;&gt;STACK THE HEAT.&lt;/h1&gt;&lt;p id=&quot;description&quot;&gt;Rotate three falling shoeboxes, build chain reactions, and survive increasingly fast levels. Choose CLASSIC or NO MERCY. Every fifth level is a timed boss. No Mercy adds locked boxes, stronger bosses, and rising pressure!&lt;/p&gt;&lt;button id=&quot;start&quot; class=&quot;primary&quot;&gt;START GAME ⚡&lt;/button&gt;&lt;div id=&quot;error&quot; class=&quot;err&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;controls&quot;&gt;&lt;button id=&quot;left&quot; aria-label=&quot;Move left&quot;&gt;◀&lt;/button&gt;&lt;button id=&quot;rotate&quot; aria-label=&quot;Rotate colors&quot;&gt;⟳&lt;/button&gt;&lt;button id=&quot;right&quot; aria-label=&quot;Move right&quot;&gt;▶&lt;/button&gt;&lt;button id=&quot;drop&quot; class=&quot;drop&quot; aria-label=&quot;Hard drop&quot;&gt;DROP ↓&lt;/button&gt;&lt;/div&gt;&lt;div class=&quot;bar&quot;&gt;&lt;div id=&quot;heat&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;bottom&quot;&gt;&lt;span&gt;HEAT METER • COMBOS FILL THE BAR&lt;/span&gt;&lt;button id=&quot;pause&quot;&gt;PAUSE&lt;/button&gt;&lt;/div&gt;&lt;div class=&quot;tip&quot;&gt;Swipe left/right to steer • Tap the board to rotate • Swipe down to slam&lt;br&gt;Keyboard: ← → move · ↑ rotate · Space drop · P pause&lt;/div&gt;&lt;/div&gt;&lt;script type=&quot;module&quot;&gt;
+import * as THREE from &#x27;https://esm.sh/three@0.170.0&#x27;;
+const W=6,H=12, colors=[0xff5a61,0x55d9f4,0xffc34b,0xb084ff,0x9dff57];
+const $=id=&gt;document.getElementById(id),stage=$(&#x27;stage&#x27;),overlay=$(&#x27;overlay&#x27;);
+let scene,camera,renderer,board=new Array(W*H).fill(-1),pieces=[],ghost=[],tiles=[],sparks=[],active=null,playing=false,paused=false,score=0,level=1,chain=0,heat=0,last=0,acc=0,busy=false,animToken=0,toastTimer;
+let runSerial=0;let noMercy=false, nextLockAt=0,nextRiseAt=0,perfectClears=0,endedReason=&quot;&quot;;let matchesTotal=0,dropsTotal=0,levelMatches=0,levelDrops=0,levelScore=0,levelToastTimer=null;let lives=3,boss=null,clearedTotal=0;const phases=[{name:&quot;WARM UP&quot;,colors:4,ms:780,target:3},{name:&quot;GETTING HOT&quot;,colors:4,ms:600,target:4},{name:&quot;HEAT WAVE&quot;,colors:5,ms:470,target:5},{name:&quot;INFERNO&quot;,colors:5,ms:350,target:6},{name:&quot;OVERTIME&quot;,colors:6,ms:270,target:7}];const palette=[0xff5a61,0x55d9f4,0xffc34b,0xb084ff,0x9dff57,0xff8e43];colors.splice(0,colors.length,...palette);const phase=()=&gt;phases[Math.min(phases.length-1,Math.floor((level-1)/3))];const phaseName=()=&gt;phase().name;let best=Number(localStorage.getItem(&#x27;sv_heatstack3_best&#x27;)||0);$(&#x27;best&#x27;).textContent=best;
+const idx=(x,y)=&gt;y*W+x, inside=(x,y)=&gt;x&gt;=0&amp;&amp;x&lt;W&amp;&amp;y&gt;=0&amp;&amp;y&lt;H;
+function init3d(){scene=new THREE.Scene();scene.background=new THREE.Color(0x09110d);camera=new THREE.OrthographicCamera(-5.9,5.9,9.5,-9.5,.1,100);camera.position.set(10,12,19);camera.lookAt(0,5.3,0);renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:&#x27;high-performance&#x27;});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;stage.prepend(renderer.domElement);scene.add(new THREE.HemisphereLight(0xd4ffcb,0x203327,2));const light=new THREE.DirectionalLight(0xffffff,2.3);light.position.set(-4,15,10);light.castShadow=true;light.shadow.mapSize.set(1024,1024);scene.add(light);const floor=new THREE.Mesh(new THREE.BoxGeometry(8,.25,3),new THREE.MeshStandardMaterial({color:0x18301c,metalness:.5,roughness:.35}));floor.position.set(0,-.9,0);floor.receiveShadow=true;scene.add(floor);const railMat=new THREE.MeshStandardMaterial({color:0x355d32,metalness:.7,roughness:.3});for(const x of [-3.55,3.55]){let rail=new THREE.Mesh(new THREE.BoxGeometry(.13,13,.15),railMat);rail.position.set(x,5.1,-.65);scene.add(rail)}for(let y=0;y&lt;=12;y++){let line=new THREE.Mesh(new THREE.BoxGeometry(6.5,.025,.025),new THREE.MeshBasicMaterial({color:0x25452b}));line.position.set(0,y-.5,-.8);scene.add(line)}for(let x=0;x&lt;=6;x++){let line=new THREE.Mesh(new THREE.BoxGeometry(.025,12,.025),new THREE.MeshBasicMaterial({color:0x25452b}));line.position.set(x-3,5.5,-.8);scene.add(line)}resize();window.addEventListener(&#x27;resize&#x27;,resize);requestAnimationFrame(loop)}
+function resize(){if(!renderer)return;let w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);const aspect=w/h;const vertical=14.7;camera.left=-vertical*aspect/2;camera.right=vertical*aspect/2;camera.top=vertical/2;camera.bottom=-vertical/2;camera.position.set(7.7,10.2,20);camera.lookAt(0,5.35,0);camera.updateProjectionMatrix()}
+const geoBase=new THREE.BoxGeometry(.86,.60,.78),geoLid=new THREE.BoxGeometry(.93,.16,.84),geoStripe=new THREE.BoxGeometry(.48,.018,.17);function boxMesh(c,opacity=1){if(c===-2){let g=new THREE.Group();let block=new THREE.Mesh(new THREE.BoxGeometry(.91,.76,.83),new THREE.MeshStandardMaterial({color:0x3a3e42,metalness:.8,roughness:.26}));block.castShadow=true;g.add(block);let bars=new THREE.Mesh(new THREE.BoxGeometry(.8,.10,.9),new THREE.MeshStandardMaterial({color:0xffb53c,emissive:0x6a3100,emissiveIntensity:.3}));g.add(bars);return g}let g=new THREE.Group();let m=new THREE.MeshStandardMaterial({color:colors[c],metalness:.32,roughness:.35,transparent:opacity&lt;1,opacity});let base=new THREE.Mesh(geoBase,m);base.position.y=-.10;base.castShadow=true;g.add(base);let lid=new THREE.Mesh(geoLid,new THREE.MeshStandardMaterial({color:colors[c],metalness:.48,roughness:.26,transparent:opacity&lt;1,opacity}));lid.position.y=.29;lid.castShadow=true;g.add(lid);let stripe=new THREE.Mesh(geoStripe,new THREE.MeshStandardMaterial({color:0xffffff,emissive:colors[c],emissiveIntensity:.3,transparent:opacity&lt;1,opacity}));stripe.position.set(0,.375,0);g.add(stripe);return g}
+function pos(obj,x,y){obj.position.set(x-2.5,y,0)}function clearMeshes(arr){for(const m of arr)scene.remove(m);arr.length=0}
+function drawBoard(){clearMeshes(tiles);for(let y=0;y&lt;H;y++)for(let x=0;x&lt;W;x++){let c=board[idx(x,y)];if(c===-1)continue;let m=boxMesh(c);pos(m,x,y);scene.add(m);tiles.push(m)}}
+function can(x,y){for(let i=0;i&lt;3;i++){let yy=y+i;if(x&lt;0||x&gt;=W||yy&lt;0||yy&gt;=H||board[idx(x,yy)]!==-1)return false}return true}
+function injectLock(){if(!noMercy||level&lt;10)return;const candidates=[];for(let x=0;x&lt;W;x++)for(let y=0;y&lt;Math.min(H-3,8);y++){if(board[idx(x,y)]===-1&amp;&amp;(y===0||board[idx(x,y-1)]!==-1))candidates.push(idx(x,y))}if(candidates.length){board[candidates[Math.floor(Math.random()*candidates.length)]]=-2;drawBoard();toast(&#x27;LOCKED BOX!&#x27;)}}
+function riseBoard(){if(!noMercy||level&lt;20)return;for(let x=0;x&lt;W;x++)if(board[idx(x,H-1)]!==-1){gameOver(&#x27;BOARD OVERFLOW&#x27;);return}for(let y=H-1;y&gt;0;y--)for(let x=0;x&lt;W;x++)board[idx(x,y)]=board[idx(x,y-1)];for(let x=0;x&lt;W;x++)board[idx(x,0)]=(x===Math.floor(Math.random()*W))?-1:Math.floor(Math.random()*phase().colors);drawBoard();toast(&#x27;PRESSURE RISE!&#x27;);}
+function spawn(){if(noMercy&amp;&amp;level&gt;=10&amp;&amp;dropsTotal&gt;=nextLockAt){nextLockAt=dropsTotal+Math.max(4,9-Math.floor(level/5));injectLock()}if(noMercy&amp;&amp;level&gt;=20&amp;&amp;dropsTotal&gt;=nextRiseAt){nextRiseAt=dropsTotal+Math.max(7,15-Math.floor(level/5));riseBoard();if(!playing)return}let x=2,y=H-3,c=[0,0,0].map(()=&gt;Math.floor(Math.random()*phase().colors));if(!can(x,y)){gameOver();return}active={x,y,drawY:y,c};updatePieces()}
+function updatePieces(){clearMeshes(pieces);clearMeshes(ghost);if(!active)return;for(let i=0;i&lt;3;i++){let m=boxMesh(active.c[i]);pos(m,active.x,active.drawY+i);scene.add(m);pieces.push(m)}let yy=active.y;while(can(active.x,yy-1))yy--;for(let i=0;i&lt;3;i++){let g=boxMesh(active.c[i],.18);pos(g,active.x,yy+i);scene.add(g);ghost.push(g)}}
+function move(dir){if(!playing||paused||busy||!active)return;if(can(active.x+dir,active.y)){active.x+=dir;updatePieces()}}
+function rotate(){if(!playing||paused||busy||!active)return;active.c.unshift(active.c.pop());updatePieces()}
+function land(){if(!active||busy)return;dropsTotal++;levelDrops++;const {x,y,c}=active;for(let i=0;i&lt;3;i++)board[idx(x,y+i)]=c[i];active=null;clearMeshes(pieces);clearMeshes(ghost);drawBoard();busy=true;resolveMatches()}
+function drop(){if(!playing||paused||busy||!active)return;while(can(active.x,active.y-1))active.y--;active.drawY=active.y;updatePieces();land()}
+function groups(){let seen=new Set(),matches=new Set();for(let y=0;y&lt;H;y++)for(let x=0;x&lt;W;x++){let k=idx(x,y);if(board[k]&lt;0||seen.has(k))continue;let c=board[k],queue=[k],group=[];seen.add(k);while(queue.length){let t=queue.pop();group.push(t);let tx=t%W,ty=Math.floor(t/W);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){let xx=tx+dx,yy=ty+dy,j=idx(xx,yy);if(inside(xx,yy)&amp;&amp;!seen.has(j)&amp;&amp;board[j]===c){seen.add(j);queue.push(j)}}}if(group.length&gt;=3)for(const q of group)matches.add(q)}return [...matches]}
+function gravity(){for(let x=0;x&lt;W;x++){let vals=[];for(let y=0;y&lt;H;y++)if(board[idx(x,y)]!==-1)vals.push(board[idx(x,y)]);for(let y=0;y&lt;H;y++)board[idx(x,y)]=y&lt;vals.length?vals[y]:-1}}
+function breakAdjacentLocks(found){if(!noMercy)return;const unlock=new Set();for(const k of found){const x=k%W,y=Math.floor(k/W);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+dx,yy=y+dy;if(inside(xx,yy)&amp;&amp;board[idx(xx,yy)]===-2)unlock.add(idx(xx,yy))}}for(const k of unlock)board[k]=-1;if(unlock.size)toast(&#x27;LOCK BREAK +&#x27;+unlock.size)}
+function toast(t){$(&#x27;toast&#x27;).textContent=t;$(&#x27;toast&#x27;).classList.add(&#x27;show&#x27;);clearTimeout(toastTimer);toastTimer=setTimeout(()=&gt;$(&#x27;toast&#x27;).classList.remove(&#x27;show&#x27;),900)}
+function burst(cells){for(const k of cells){let x=k%W,y=Math.floor(k/W),c=board[k];for(let i=0;i&lt;7;i++){let mesh=new THREE.Mesh(new THREE.BoxGeometry(.09,.09,.09),new THREE.MeshBasicMaterial({color:colors[c]}));pos(mesh,x,y);scene.add(mesh);sparks.push({mesh,vx:(Math.random()-.5)*.15,vy:(Math.random()-.3)*.18,life:24})}}}
+function resolveMatches(){let n=0;function step(){if(!playing)return;let found=groups();if(!found.length){if(board.every(v=&gt;v===-1)&amp;&amp;dropsTotal&gt;0){perfectClears++;score+=500*perfectClears;toast(&#x27;PERFECT CLEAR +&#x27;+(500*perfectClears));updateHUD()}chain=0;$(&#x27;chain&#x27;).textContent=&#x27;—&#x27;;busy=false;spawn();return}n++;matchesTotal++;if(!boss)levelMatches++;chain=n;$(&#x27;chain&#x27;).textContent=&#x27;x&#x27;+n;score+=found.length*10*n;clearedTotal+=found.length;if(boss){boss.cleared+=found.length;if(boss.cleared&gt;=boss.goal){score+=500+level*30;toast(&quot;BOSS DEFEATED + BONUS!&quot;);boss=null;level++;levelMatches=0;updateMission();}}heat=Math.min(100,heat+found.length*3*n);if(heat&gt;=100){score+=250;heat=0;toast(&#x27;HEAT MODE +250&#x27;)}else toast(n&gt;1?&#x27;CHAIN x&#x27;+n+&#x27;!&#x27;:&#x27;MATCH +&#x27;+found.length*10);checkLevel();updateHUD();burst(found);breakAdjacentLocks(found);for(const k of found)board[k]=-1;drawBoard();setTimeout(()=&gt;{if(!playing)return;gravity();drawBoard();setTimeout(step,180)},320)}step()}
+function checkLevel(){if(boss){updateMission();return}const required=phase().target;while(levelMatches&gt;=required){levelMatches-=required;level++;levelDrops=0;if(level%5===0){boss={goal:Math.min((noMercy?18:12)+Math.floor(level/5)*(noMercy?5:3),noMercy?50:30),cleared:0,time:Math.max(noMercy?24:35,(noMercy?50:65)-Math.floor(level/5)*(noMercy?6:5))*1000};toast(&quot;BOSS ROUND • LEVEL &quot;+level);break;}const label=phaseName();toast(&#x27;LEVEL &#x27;+level+&#x27; • &#x27;+label);if(level%3===1)score+=level*25;}updateMission()}
+function updateMission(){const ph=phase();$(&#x27;bossBanner&#x27;).style.display=boss?&#x27;block&#x27;:&#x27;none&#x27;;if(boss){$(&#x27;bossTitle&#x27;).textContent=&#x27;⚡ BOSS ROUND • &#x27;+lives+&#x27; LIVES LEFT&#x27;;$(&#x27;bossProgress&#x27;).textContent=&#x27;Clear &#x27;+boss.goal+&#x27; boxes in &#x27;+Math.ceil(boss.time/1000)+&#x27;s • &#x27;+boss.cleared+&#x27;/&#x27;+boss.goal;} $(&#x27;missionTitle&#x27;).textContent=&#x27;LEVEL &#x27;+level+&#x27; • &#x27;+ph.name+&#x27; • &#x27;+ph.colors+&#x27; COLORS&#x27;;$(&#x27;missionProgress&#x27;).textContent=boss?&#x27;BOSS CHALLENGE ACTIVE • Beat the timer!&#x27;:&#x27;Clear &#x27;+ph.target+&#x27; matches to advance • &#x27;+Math.min(levelMatches,ph.target)+&#x27;/&#x27;+ph.target+&#x27; • Fall &#x27;+(ph.ms/1000).toFixed(2)+&#x27;s • ♥ &#x27;+lives;}
+function updateHUD(){updateMission();$(&#x27;score&#x27;).textContent=score;$(&#x27;level&#x27;).textContent=level;$(&#x27;heat&#x27;).style.width=heat+&#x27;%&#x27;;if(score&gt;best){best=score;$(&#x27;best&#x27;).textContent=best;localStorage.setItem(&#x27;sv_heatstack3_best&#x27;,best)}}
+function start(){runSerial++;animToken++;nextLockAt=7;nextRiseAt=12;perfectClears=0;endedReason=&quot;&quot;;board.fill(-1);score=0;level=1;chain=0;heat=0;acc=0;matchesTotal=0;dropsTotal=0;levelMatches=0;levelDrops=0;lives=3;boss=null;clearedTotal=0;playing=true;paused=false;busy=false;active=null;last=performance.now();overlay.classList.add(&#x27;hidden&#x27;);$(&#x27;pause&#x27;).textContent=&#x27;PAUSE&#x27;;updateHUD();drawBoard();spawn()}
+function gameOver(reason=&quot;BOARD FILLED&quot;){endedReason=reason;playing=false;try{if(window.parent!==window &amp;&amp; dropsTotal&gt;0){window.parent.postMessage({type:&#x27;sv-heatstack-finished&#x27;,runId:runSerial,mode:noMercy?&#x27;mercy&#x27;:&#x27;classic&#x27;,score:score,level:level,drops:dropsTotal,reason:reason},&#x27;*&#x27;)}}catch(e){}active=null;clearMeshes(pieces);clearMeshes(ghost);$(&#x27;headline&#x27;).textContent=&#x27;RUN COMPLETE&#x27;;$(&#x27;description&#x27;).textContent=endedReason+&#x27; • You scored &#x27;+score.toLocaleString()+&#x27; points. Reached level &#x27;+level+&#x27;. Ready for another round?&#x27;;$(&#x27;start&#x27;).textContent=&#x27;PLAY AGAIN ⚡&#x27;;overlay.classList.remove(&#x27;hidden&#x27;)}
+function togglePause(){if(!playing)return;paused=!paused;$(&#x27;pause&#x27;).textContent=paused?&#x27;RESUME&#x27;:&#x27;PAUSE&#x27;;if(paused){$(&#x27;headline&#x27;).textContent=&#x27;PAUSED&#x27;;$(&#x27;description&#x27;).textContent=&#x27;Take a break. Your stack is waiting.&#x27;;$(&#x27;start&#x27;).textContent=&#x27;RESUME&#x27;;overlay.classList.remove(&#x27;hidden&#x27;)}else{overlay.classList.add(&#x27;hidden&#x27;);last=performance.now()}}
+function loop(now){requestAnimationFrame(loop);let dt=Math.min(50,now-last||0);last=now;if(playing&amp;&amp;!paused&amp;&amp;boss){boss.time-=dt;if(boss.time&lt;=0){lives--;if(lives&lt;=0){gameOver(&#x27;BOSS LIVES EXHAUSTED&#x27;);}else{boss.time=45000;boss.cleared=0;toast(&quot;TIME UP • LIFE LOST&quot;);}updateMission();}else if(Math.floor(boss.time/1000)!==Math.floor((boss.time+dt)/1000))updateMission();}if(playing&amp;&amp;!paused&amp;&amp;!busy&amp;&amp;active){acc+=dt;let speed=Math.max(noMercy?100:165,phase().ms-Math.min(2,(level-1)%3)*42-(noMercy?Math.min(200,level*13):0));if(acc&gt;=speed){acc=0;if(can(active.x,active.y-1)){active.y--;active.drawY=active.y;updatePieces()}else land()}}for(let i=sparks.length-1;i&gt;=0;i--){let p=sparks[i];p.mesh.position.x+=p.vx;p.mesh.position.y+=p.vy;p.vy-=.009;p.life--;p.mesh.scale.multiplyScalar(.96);if(p.life&lt;=0){scene.remove(p.mesh);p.mesh.geometry.dispose();p.mesh.material.dispose();sparks.splice(i,1)}}renderer.render(scene,camera)}
+$(&#x27;start&#x27;).onclick=()=&gt;{if(paused)togglePause();else start()};$(&#x27;left&#x27;).onclick=()=&gt;move(-1);$(&#x27;right&#x27;).onclick=()=&gt;move(1);$(&#x27;rotate&#x27;).onclick=rotate;$(&#x27;drop&#x27;).onclick=drop;$(&#x27;pause&#x27;).onclick=togglePause;
+$(&#x27;classicMode&#x27;).onclick=()=&gt;{if(playing)return;noMercy=false;$(&#x27;classicMode&#x27;).classList.add(&#x27;chosen&#x27;);$(&#x27;mercyMode&#x27;).classList.remove(&#x27;chosen&#x27;)};$(&#x27;mercyMode&#x27;).onclick=()=&gt;{if(playing)return;noMercy=true;$(&#x27;mercyMode&#x27;).classList.add(&#x27;chosen&#x27;);$(&#x27;classicMode&#x27;).classList.remove(&#x27;chosen&#x27;)};document.addEventListener(&#x27;keydown&#x27;,e=&gt;{if([&#x27;ArrowLeft&#x27;,&#x27;ArrowRight&#x27;,&#x27;ArrowUp&#x27;,&#x27;ArrowDown&#x27;,&#x27;Space&#x27;].includes(e.code))e.preventDefault();if(e.code===&#x27;ArrowLeft&#x27;)move(-1);if(e.code===&#x27;ArrowRight&#x27;)move(1);if(e.code===&#x27;ArrowUp&#x27;)rotate();if(e.code===&#x27;Space&#x27;||e.code===&#x27;ArrowDown&#x27;)drop();if(e.code===&#x27;KeyP&#x27;)togglePause()});let sx=0,sy=0;stage.addEventListener(&#x27;touchstart&#x27;,e=&gt;{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});stage.addEventListener(&#x27;touchend&#x27;,e=&gt;{if(!playing||paused||busy||!active)return;let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(dy&gt;45&amp;&amp;Math.abs(dy)&gt;Math.abs(dx))drop();else if(Math.abs(dx)&gt;28)move(dx&gt;0?1:-1);else rotate()},{passive:true});
+try{init3d()}catch(e){$(&#x27;error&#x27;).textContent=&#x27;3D could not start: &#x27;+e.message;console.error(e)}
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+"></iframe><p class="svmuted">Game progress is local to this browser. SV rewards are demo-only and are not secure against tampering.</p></div></div><div id="sv-arcade-earn-pane" hidden></div></section><section class="svpage" id="sv-earn"><div class="svpanel"><div class="earn-head"><div><div class="svmuted">SOLEVAULT / DAILY GRIND</div><h2>EARN YOUR HEAT.</h2></div><div class="svmoney"><span class="sv-balance">0</span> <small style="font-size:13px">SV</small></div></div><p class="svmuted">Complete daily challenges and play Sneaker Match to fund your next drop. All rewards are virtual and saved on this device.</p><div class="earn-banner" id="earn-date">TODAY'S CHALLENGES</div><div id="earn-quests"></div></div><div class="svpanel"><div class="earn-head"><div><div class="svmuted">MINI-GAME 01</div><h2>SNEAKER MATCH.</h2></div><span style="color:#baff43;font-weight:900" id="match-counter">0 / 6</span></div><p class="svmuted">Pick a difficulty, memorize the sneakers, and beat the clock. Correct matches build your combo; mistakes break it. Earn up to 300 SV daily.</p><div class="heat-modes" id="heat-modes" aria-label="Choose match difficulty"><button class="heat-mode" data-mode="0">ROOKIE<small>6 pairs · 60 sec · 25 SV</small></button><button class="heat-mode" data-mode="1">STREET<small>8 pairs · 45 sec · 50 SV</small></button><button class="heat-mode selected" data-mode="2">PRO<small>10 pairs · 40 sec · 75 SV</small></button><button class="heat-mode" data-mode="3">LEGEND<small>12 pairs · 35 sec · 125 SV</small></button></div><div class="heat-stats"><span id="heat-clock">TIME: —</span><span id="heat-combo">COMBO: 0</span><span id="heat-mistakes">MISSES: 0</span></div><div class="earn-banner" id="match-message" aria-live="polite">Choose a difficulty and start your Heat Check.</div><div class="match-grid" id="match-grid" aria-label="Sneaker matching cards"></div><button class="svcta" id="match-start">START ROUND →</button><div class="svmuted" id="match-limit"></div></div></section><section class="svpage" id="sv-drops"><div class="svpanel"><h2>CHOOSE YOUR DROP.</h2><p class="svmuted">Virtual balance: <b class="sv-balance">0</b> SV. Pay to unlock the hidden 3D carousel. Each purchase grants one sneaker reveal. The tier odds determine the result.</p><div class="svtiers" id="sv-tiers"><button class="svtier chosen" data-tier="0"><strong>COMMON</strong>100 SV<small>Common 80% · Epic 18% · Legendary 2%</small></button><button class="svtier" data-tier="1"><strong>UNCOMMON</strong>250 SV<small>Common 55% · Epic 38% · Legendary 7%</small></button><button class="svtier" data-tier="2"><strong>RARE</strong>600 SV<small>Common 20% · Epic 60% · Legendary 20%</small></button><button class="svtier" data-tier="3"><strong>EPIC</strong>1,200 SV<small>Common 0% · Epic 75% · Legendary 25%</small></button></div><p class="svmuted">Current demo has only three sneaker rarities: Common, Epic, and Legendary. Tier names refer to drop packages, not guaranteed shoe rarities. Epic tier guarantees an Epic-or-better shoe; after 10 Epic-tier entries without a Legendary, the next Epic-tier entry guarantees Legendary.</p><button class="svcta" id="sv-enter">ENTER COMMON DROP • 100 SV</button><div class="svnotice" id="sv-drop-message"></div></div><div id="sv-carousel-slot"></div></section><section class="svpage" id="sv-vault"><div id="sv-vault-slot"></div></section><div id="sv-carousel-start"><h1>SPIN THE<br><span class="lime">VAULT.</span></h1><p>Drag to rotate a full circle of nine sneaker boxes. Tap a side box to rotate it to the front, or use the arrows. Then open your pick.</p><div id="error"></div><div class="stage" id="stage"><div class="loading" id="loading">LOADING 3D SHOWROOM…</div><div class="hint">DRAG TO SPIN • TAP A BOX • OPEN</div></div><div class="tag" id="counter">BOX 01 OF 09</div><div class="controls"><button id="prev" aria-label="Previous box">←</button><strong>360° SHOWROOM</strong><button id="next" aria-label="Next box">→</button></div><button class="primary" id="open">OPEN THIS BOX ⚡</button><div class="status" id="status"></div></div><section id="vaultPanel" aria-label="My Sneaker Vault">
+<div class="vault-head"><div><div class="vault-kicker">PRIVATE COLLECTION / SV</div><h2 class="vault-title">THE VAULT<span style="color:#baff43">.</span></h2></div><span id="vaultCount" class="vault-count">0 PAIRS</span></div>
+<div style="font-size:12px;color:#b5c7b0">Your sneaker gallery. Every pull counts. Tap a card to inspect its real 3D model.</div>
+<div class="vault-summary"><div class="vault-stat"><strong id="vaultUnique">0/3</strong><span>Styles owned</span></div><div class="vault-stat"><strong id="vaultValue">0</strong><span>Total SV base</span></div><div class="vault-stat"><strong id="vaultDupes">0</strong><span>Duplicates</span></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:#d3e9c8"><strong>FOUNDATION COLLECTION</strong><span id="vaultProgressLabel">0% COMPLETE</span></div>
+<div class="vault-progress-track"><div class="vault-progress-fill" id="vaultProgress"></div></div>
+<div class="vault-filterbar" id="vaultFilters" aria-label="Filter sneakers"><button type="button" class="vault-filter active" data-filter="ALL">ALL</button><button type="button" class="vault-filter" data-filter="LEGENDARY">LEGENDARY</button><button type="button" class="vault-filter" data-filter="EPIC">EPIC</button><button type="button" class="vault-filter" data-filter="COMMON">COMMON</button></div>
+<div class="collector-panel" id="collectorPanel"><div class="collector-kicker">SV COLLECTOR PASSPORT</div><div class="collector-head"><div>LEVEL <strong id="collectorLevel">1</strong><small id="collectorXp"> 0 XP</small></div><small id="collectorNext">NEXT LEVEL</small></div><div class="collector-meter"><i id="collectorMeter"></i></div><div class="collector-feature" id="collectorFeature"><div class="vault-art" id="featuredArt"><span>★</span></div><div><b id="featuredName">NO FEATURED SNEAKER</b><small id="featuredMeta">Choose a pair below to showcase</small></div></div><div class="collector-set"><span>FOUNDATION SET<br><small id="collectorSetInfo">Collect all three styles</small></span><strong id="collectorSetBadge">IN PROGRESS</strong></div><small style="color:#9eb398;font-size:10px">XP is calculated from saved pulls. Set completion earns a badge; SV rewards are planned for a future update.</small></div><div id="vaultList"></div><div id="vaultEmpty" style="padding:26px 12px;color:#aab7a5;text-align:center;background:#060d08;border:1px dashed #4c6941;border-radius:14px">YOUR GALLERY IS WAITING.<div style="font-size:12px;margin-top:8px">Open a box and save your first sneaker to start collecting.</div></div>
+<div style="font-size:10px;color:#789474;margin-top:13px">SV values are virtual base estimates, not cash or tradeable currency.</div>
+</section><div class="fine">FREE DEMO • VIRTUAL SV BASE VALUES • NO REAL MONEY OR PHYSICAL PRIZES</div></div><div class="overlay" id="overlay"><div id="svIdent" aria-hidden="true"><div class="sv-emblem" aria-label="SV lightning logo"><svg viewBox="0 0 260 160" role="img" aria-label="Bold S and V meet in a diagonal lightning strike"><defs><filter id="svGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><text class="sv-s" x="49" y="119" font-family="Arial Black,Impact,Arial,sans-serif" font-size="112" font-weight="900" fill="#baff43" stroke="#edffbf" stroke-width="1.5" filter="url(#svGlow)">S</text><text class="sv-v" x="133" y="119" font-family="Arial Black,Impact,Arial,sans-serif" font-size="112" font-weight="900" fill="#eaffc9" stroke="#baff43" stroke-width="1.5" filter="url(#svGlow)">V</text><path class="sv-spark" d="M157 -18 L121 44 L148 42 L109 99 L134 93 L106 174" fill="none" stroke="#eaffc9" stroke-width="7" stroke-linecap="round" stroke-linejoin="miter" filter="url(#svGlow)"/><path class="sv-bolt" d="M230 -24 L180 15 L192 31 L148 52 L164 70 L111 92 L130 110 L48 185" fill="none" stroke="#efffc9" stroke-width="7" stroke-linecap="round" stroke-linejoin="bevel"/><path class="sv-branch" d="M148 52 L104 35 L82 49 M111 92 L175 102 L190 129 M180 15 L210 22 L225 6" fill="none" stroke="#baff43" stroke-width="3" stroke-linecap="round"/></svg><div class="sv-impact"></div><div class="sv-shockwave"></div></div><svg class="sv-screen-bolt" viewBox="0 0 360 780" preserveAspectRatio="none" aria-hidden="true"><path class="aura" d="M340 -30 L282 105 L307 133 L214 252 L241 285 L164 388 L187 419 L104 529 L125 553 L20 812"/><path class="main" d="M340 -30 L282 105 L307 133 L214 252 L241 285 L164 388 L187 419 L104 529 L125 553 L20 812"/><path class="twig" d="M214 252 L127 222 L94 260 M164 388 L260 370 L304 408 M104 529 L38 501 L8 530 M282 105 L215 82 L179 109 M241 285 L323 254 L350 278 M187 419 L268 454 L296 440 M125 553 L207 585 L231 573 M104 529 L155 476 L184 484"/><path class="electric-branch" d="M282 105 L331 152 L309 174 M214 252 L165 189 L129 197 M164 388 L87 344 L51 355 M187 419 L277 483 L312 472 M104 529 L53 619 L25 624"/></svg><div class="sv-strobe"></div><div class="sv-wordmark">SOLE<b>VAULT</b></div><div class="sv-caption">THE HEAT IS INSIDE</div></div><div id="cinematicFX" aria-hidden="true"><div class="fx-flash"></div><div class="fx-rays"></div><div class="fx-particles"></div></div><div class="cinema-top" id="cinemaTop">THE VAULT IS OPENING</div><div class="visual" id="visual"><div id="reveal3d"></div><div id="revealHint">DRAG TO ROTATE SNEAKER</div></div><div id="revealRating" aria-live="polite"></div><h2 id="resultTitle">UNLOCKED!</h2><p id="resultSub">Demo sneaker collectible</p><div class="rarity-tag" id="rarityTag" hidden>RARE PULL</div><button class="primary" id="savePull" style="display:none;background:#baff43;color:#10200b;margin-bottom:10px">SAVE TO MY VAULT +</button><button class="primary" id="close">BACK TO THE VAULT</button></div><div id="passportDialog" role="dialog" aria-modal="true" aria-labelledby="passportTitle"><div class="passport-sheet"><div class="passport-kicker">SOLEVAULT / COLLECTOR PASSPORT</div><h3 id="passportTitle"></h3><div class="passport-line"><span>Rarity</span><strong id="passportRarity"></strong></div><div class="passport-line"><span>Acquired</span><strong id="passportDate"></strong></div><div class="passport-line"><span>Virtual base value</span><strong id="passportValue"></strong></div><span class="passport-id" id="passportId"></span><p style="color:#98ac91;font-size:11px;line-height:1.5">Local demo collectible ID. Not a globally verified serial number or a physical sneaker.</p><button type="button" id="passportClose">BACK TO COLLECTION</button></div></div><script type="module">
+const error=document.getElementById('error'),loading=document.getElementById('loading'),stage=document.getElementById('stage');
+try{
+const THREE=await import('https://esm.sh/three@0.170.0');
+const {GLTFLoader}=await import('https://esm.sh/three@0.170.0/examples/jsm/loaders/GLTFLoader.js');
+const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(43,stage.clientWidth/stage.clientHeight,.1,100);camera.position.set(0,4.5,12);camera.lookAt(0,1.0,0);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'default'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(stage.clientWidth,stage.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;stage.prepend(renderer.domElement);loading.remove();
+scene.add(new THREE.AmbientLight(0xffffff,1.8));const light=new THREE.DirectionalLight(0xc8ff88,3.5);light.position.set(-4,9,8);scene.add(light);const rim=new THREE.PointLight(0xbaff43,70,22);rim.position.set(4,5,-3);scene.add(rim);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(8,80),new THREE.MeshStandardMaterial({color:0x142117,roughness:.85}));floor.rotation.x=-Math.PI/2;floor.position.y=-.35;scene.add(floor);
+// V16.1: 3D sneaker showroom. Decorative meshes are excluded from selection raycasts.
+const room=new THREE.Group();scene.add(room);
+const architecture=new THREE.MeshStandardMaterial({color:0x101816,metalness:.48,roughness:.43});
+const wallMat=new THREE.MeshStandardMaterial({color:0x0a1110,metalness:.18,roughness:.7,side:THREE.DoubleSide});
+const neonMat=new THREE.MeshBasicMaterial({color:0xbaff43});
+const goldMat=new THREE.MeshBasicMaterial({color:0xffd17b});
+function roomMesh(geometry,material,x,y,z,rx=0,ry=0,rz=0){const o=new THREE.Mesh(geometry,material);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);room.add(o);return o}
+// Curved-looking showroom backdrop, panels, roof lighting and neon vertical seams.
+roomMesh(new THREE.PlaneGeometry(32,13),wallMat,0,4,-9);
+roomMesh(new THREE.PlaneGeometry(25,13),wallMat,-13,4,-1,0,Math.PI/2);
+roomMesh(new THREE.PlaneGeometry(25,13),wallMat,13,4,-1,0,-Math.PI/2);
+for(let i=-5;i<=5;i++){
+ const x=i*2.25;
+ roomMesh(new THREE.BoxGeometry(.065,7,.10),i%3===0?neonMat:architecture,x,3.3,-8.85);
+ roomMesh(new THREE.BoxGeometry(1.55,.09,.12),architecture,x,6.65,-8.8);
+}
+// Dark reflective-feel exhibition floor and concentric luminous stage rails.
+roomMesh(new THREE.CircleGeometry(13,72),new THREE.MeshStandardMaterial({color:0x101a17,metalness:.72,roughness:.26}),0,-.43,0,-Math.PI/2);
+for(const radius of [4.95,5.18,6.5]){
+ const rail=roomMesh(new THREE.TorusGeometry(radius,.028,5,96),radius===5.18?neonMat:architecture,0,-.34,0,Math.PI/2);
+}
+for(let i=0;i<16;i++){
+ const a=i*Math.PI/8;
+ const r=7.0;
+ roomMesh(new THREE.BoxGeometry(.025,.012,1.4),i%4===0?neonMat:architecture,Math.sin(a)*r,-.325,Math.cos(a)*r,0,a,0);
+}
+// Elevated exhibition plinth beneath carousel (below shoe boxes).
+roomMesh(new THREE.CylinderGeometry(5.25,5.45,.25,64),architecture,0,-.43,0);
+roomMesh(new THREE.TorusGeometry(5.3,.045,8,96),neonMat,0,-.28,0,Math.PI/2);
+// Branded luminous signage integrated into the far wall.
+const signCanvas=document.createElement('canvas');signCanvas.width=1024;signCanvas.height=256;
+const signCtx=signCanvas.getContext('2d');signCtx.fillStyle='#baff43';signCtx.font='900 118px Arial';signCtx.textAlign='center';signCtx.fillText('SOLEVAULT',512,135);signCtx.fillStyle='#d4e5d2';signCtx.font='bold 29px Arial';signCtx.letterSpacing='12px';signCtx.fillText('THE SNEAKER SHOWROOM',512,198);
+const signTex=new THREE.CanvasTexture(signCanvas);signTex.colorSpace=THREE.SRGBColorSpace;
+roomMesh(new THREE.PlaneGeometry(8.6,2.15),new THREE.MeshBasicMaterial({map:signTex,transparent:true,depthWrite:false}),0,5.3,-8.69);
+// Ceiling bars and spotlights aimed toward the carousel.
+for(const x of [-6,0,6]){
+ roomMesh(new THREE.BoxGeometry(2.7,.12,.3),architecture,x,7.0,-3);
+ const spot=new THREE.SpotLight(x===0?0xf3fff0:0xbaff43, x===0?115:75,23,Math.PI/5,.75,1.5);
+ spot.position.set(x,7,-3);spot.target.position.set(x*.3,0,0);room.add(spot,spot.target);
+ roomMesh(new THREE.CylinderGeometry(.19,.27,.23,12),architecture,x,6.87,-3);
+}
+// V17: neon street-art mural, animated on a canvas texture (no external images).
+const muralCanvas=document.createElement('canvas');muralCanvas.width=1024;muralCanvas.height=512;
+const mx=muralCanvas.getContext('2d');
+const muralTex=new THREE.CanvasTexture(muralCanvas);muralTex.colorSpace=THREE.SRGBColorSpace;
+const muralWall=roomMesh(new THREE.PlaneGeometry(24,11.6),new THREE.MeshBasicMaterial({map:muralTex,transparent:false,side:THREE.DoubleSide}),0,3.8,-8.93);
+// Graffiti art and ticker elements stay behind the boxes and never intercept touches.
+const streetBits=[];
+const streetColors=[0xbaff43,0x70ffaf,0xffffff,0x314c35];
+for(let i=0;i<18;i++){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(.28+(i%3)*.15,.045,.035),new THREE.MeshBasicMaterial({color:streetColors[i%4],transparent:true,opacity:.42,depthWrite:false}));
+ const a=i*2.399; m.position.set(Math.sin(a)*8.5,1.1+(i%6)*.77,-8.35+(i%3)*.07);m.rotation.z=a;room.add(m);streetBits.push(m);
+}
+const streetText=document.createElement('canvas');streetText.width=512;streetText.height=128;
+const st=streetText.getContext('2d');st.clearRect(0,0,512,128);st.fillStyle='#baff43';st.font='900 78px Arial Black,Arial';st.textAlign='center';st.fillText('STREET HEAT',256,85);
+const streetTextMap=new THREE.CanvasTexture(streetText);streetTextMap.colorSpace=THREE.SRGBColorSpace;
+const floatingTag=roomMesh(new THREE.PlaneGeometry(4.3,1.07),new THREE.MeshBasicMaterial({map:streetTextMap,transparent:true,depthWrite:false,side:THREE.DoubleSide}),-6.7,3.1,-8.28,0,.08,-.13);
+let muralFrame=-1;
+function drawMural(t){
+ const f=Math.floor(t*12);if(f===muralFrame)return;muralFrame=f;
+ const w=1024,h=512;mx.fillStyle='#07100b';mx.fillRect(0,0,w,h);mx.save();mx.globalAlpha=.07+.045*Math.sin(t*1.2);mx.fillStyle='#baff43';mx.translate(512,256);mx.rotate(-.14);mx.fillRect(-570,-6,1140,14);mx.fillRect(-570,65,1140,5);mx.restore();
+ // Painted brickwork, green haze and layered spray strokes.
+ for(let y=0;y<h;y+=37){for(let x=-50;x<w+50;x+=118){mx.strokeStyle='rgba(91,136,90,.16)';mx.lineWidth=2;mx.strokeRect(x+((Math.floor(y/37)%2)*59),y,115,34)}}
+ const glow=mx.createRadialGradient(512+Math.sin(t*.34)*180,220,25,512,220,470);glow.addColorStop(0,'rgba(88,255,91,.20)');glow.addColorStop(1,'rgba(4,17,10,0)');mx.fillStyle=glow;mx.fillRect(0,0,w,h);
+ for(let i=0;i<16;i++){
+  const x=((i*193+Math.sin(t*.33+i)*65)%1200)-90,y=(i*101)%490;
+  mx.save();mx.translate(x,y);mx.rotate(Math.sin(i*2.1)*.5);
+  mx.strokeStyle=i%3===0?'rgba(178,255,67,.4)':'rgba(74,218,119,.19)';mx.lineWidth=4+(i%4)*3;mx.lineCap='round';
+  mx.beginPath();mx.moveTo(-75,-15);mx.quadraticCurveTo(0,-35,90,15);mx.stroke();mx.restore();
+ }
+ mx.save();mx.translate(512,205);mx.rotate(-.095);mx.textAlign='center';
+ mx.lineJoin='round';mx.font='italic 900 128px Arial Black,Arial';mx.lineWidth=20;mx.strokeStyle='#0a1b0e';mx.strokeText('SOLEVAULT',0,0);
+ mx.lineWidth=5;mx.strokeStyle='#baff43';mx.strokeText('SOLEVAULT',0,0);
+ mx.fillStyle='#172f1c';mx.fillText('SOLEVAULT',0,0);
+ mx.shadowColor='#baff43';mx.shadowBlur=25;mx.fillStyle='#baff43';mx.font='italic 900 54px Arial Black,Arial';mx.fillText('THE STREET IS YOURS',0,71);mx.restore();
+ // Moving graphic ticker bands.
+ const offset=(t*65)%340;
+ for(let k=0;k<2;k++){
+  const y=340+k*73;mx.fillStyle=k?'rgba(7,29,15,.85)':'rgba(173,255,67,.88)';mx.fillRect(0,y,1024,39);
+  mx.font='900 22px Arial';mx.fillStyle=k?'#baff43':'#0c180c';
+  for(let i=-2;i<7;i++)mx.fillText(k?'///  DROP CULTURE  ///  SV MARKET':'★  RARE HEAT  ★  COLLECT  TRADE',i*340-offset,y+27);
+ }
+ for(let i=0;i<45;i++){
+  const x=(i*127.7+Math.sin(i*8.2)*60)%1024,y=(i*89.3+t*(i%4+1)*5)%512;
+  mx.fillStyle='rgba(193,255,111,'+(.1+(i%4)*.08)+')';mx.fillRect(x,y,2+(i%3),2+(i%3));
+ }
+ muralTex.needsUpdate=true;
+}
+drawMural(0);
+// V17: music-video-inspired 3D street set, lightweight and touch-transparent.
+const videoSet=new THREE.Group();room.add(videoSet);
+const videoGreen=new THREE.MeshBasicMaterial({color:0xbaff43,transparent:true,opacity:.5,depthWrite:false});
+const videoWhite=new THREE.MeshBasicMaterial({color:0xe4ffe6,transparent:true,opacity:.36,depthWrite:false});
+const videoPieces=[];
+for(let i=0;i<12;i++){
+ const a=i*Math.PI/6;
+ const p=new THREE.Group();p.position.set(Math.sin(a)*8.1,1.5+(i%4)*.8,Math.cos(a)*7.5-1.7);
+ const outer=new THREE.Mesh(new THREE.TorusGeometry(.33+(i%3)*.1,.018,5,36),i%3===0?videoWhite:videoGreen.clone());outer.rotation.y=a;p.add(outer);
+ const cut=new THREE.Mesh(new THREE.BoxGeometry(.55,.04,.03),videoGreen.clone());cut.rotation.z=(i%2?1:-1)*.5;p.add(cut);
+ videoSet.add(p);videoPieces.push({p,outer,cut,offset:i*.65});
+}
+// Luminous slanted billboard panels suggest music-video lighting without adding textures.
+const videoBars=[];
+for(let i=0;i<7;i++){
+ const bar=new THREE.Mesh(new THREE.BoxGeometry(.09,1.2+(i%3)*.4,.07),videoGreen.clone());
+ bar.position.set(-7+i*2.35,2.6+(i%2)*.6,-8.15);bar.rotation.z=(i%2?-.2:.2);
+ videoSet.add(bar);videoBars.push(bar);
+}
+const streetHalo=new THREE.Mesh(new THREE.TorusGeometry(6.25,.045,7,96),new THREE.MeshBasicMaterial({color:0xbaff43,transparent:true,opacity:.23,depthWrite:false}));streetHalo.rotation.x=Math.PI/2;streetHalo.position.y=.05;videoSet.add(streetHalo);
+const baseCamPos=camera.position.clone();const baseCamTarget=new THREE.Vector3(0,1,0);
+function animateStreetVideo(t){
+ const intensity=document.getElementById('overlay').classList.contains('show')?1.35:1;
+ videoPieces.forEach(v=>{v.p.position.y=2.0+Math.sin(t*.85+v.offset)*.36;v.p.rotation.z=Math.sin(t*.4+v.offset)*.22;v.outer.rotation.z=t*.2+v.offset;v.cut.material.opacity=(.15+.35*(.5+.5*Math.sin(t*2+v.offset)))*intensity;});
+ videoBars.forEach((b,i)=>{b.scale.y=.75+.3*Math.sin(t*1.7+i*.9);b.material.opacity=(.18+.28*(.5+.5*Math.sin(t*1.3+i)))*intensity;});
+ streetHalo.material.opacity=.17+.12*Math.sin(t*1.1)**2;streetHalo.rotation.z=t*.055;
+ // Subtle steady-cam motion: preserve the center and the tap-selection geometry.
+ camera.position.x=baseCamPos.x+Math.sin(t*.19)*.18;
+ camera.position.y=baseCamPos.y+Math.sin(t*.31)*.09;
+ camera.position.z=baseCamPos.z+Math.sin(t*.23)*.12;
+ camera.lookAt(baseCamTarget);
+ const rarity=document.getElementById('overlay').classList.contains('show')?document.getElementById('overlay').className:'';
+ const targetColor=rarity.includes('legendary')?0xffc34f:rarity.includes('epic')?0xb17cff:0xbaff43;
+ movingLight.color.lerp(new THREE.Color(targetColor),.045);
+}
+// V16.2: animated showroom set pieces; intentionally lightweight for Android.
+const motionSet=new THREE.Group();room.add(motionSet);
+const pulseRings=[];
+for(let i=0;i<3;i++){
+ const m=new THREE.Mesh(new THREE.TorusGeometry(5.48+i*.18,.018,5,96),new THREE.MeshBasicMaterial({color:i===1?0xffffff:0xbaff43,transparent:true,opacity:.3,depthWrite:false}));
+ m.rotation.x=Math.PI/2;m.position.y=-.20+i*.035;motionSet.add(m);pulseRings.push(m);
+}
+// Hovering, slowly revolving holographic sneaker display markers.
+const holograms=[];
+const holoMaterial=new THREE.MeshBasicMaterial({color:0xbaff43,wireframe:true,transparent:true,opacity:.28,depthWrite:false});
+for(let i=0;i<8;i++){
+ const holder=new THREE.Group();const a=i*Math.PI/4;
+ holder.position.set(Math.sin(a)*7.8,2.6,Math.cos(a)*7.8-1.2);
+ const diamond=new THREE.Mesh(new THREE.OctahedronGeometry(.32,0),holoMaterial.clone());holder.add(diamond);
+ const halo=new THREE.Mesh(new THREE.TorusGeometry(.5,.013,4,28),new THREE.MeshBasicMaterial({color:0xbaff43,transparent:true,opacity:.35,depthWrite:false}));halo.rotation.x=Math.PI/2;holder.add(halo);
+ motionSet.add(holder);holograms.push({holder,diamond,halo,offset:i*.74});
+}
+// Moving scan beams and a rotating holographic ceiling fixture.
+const scans=[];
+for(let i=0;i<4;i++){
+ const beam=roomMesh(new THREE.BoxGeometry(.045,5,.045),new THREE.MeshBasicMaterial({color:0xbaff43,transparent:true,opacity:.18,depthWrite:false}),-6+i*4,3,-8.56);
+ scans.push(beam);
+}
+const crown=new THREE.Group();crown.position.set(0,6.6,-1.4);room.add(crown);
+for(let i=0;i<3;i++){
+ const hoop=new THREE.Mesh(new THREE.TorusGeometry(1.35+i*.24,.022,6,64),new THREE.MeshBasicMaterial({color:i===1?0xe6fff1:0xbaff43,transparent:true,opacity:.5,depthWrite:false}));
+ hoop.rotation.x=Math.PI/2+i*.23;crown.add(hoop);
+}
+// Subtle light sweep without expensive real-time shadows.
+const movingLight=new THREE.PointLight(0xbaff43,13,11);movingLight.position.set(0,4,1);scene.add(movingLight);
+const mat=(c,metal=.2)=>new THREE.MeshStandardMaterial({color:c,metalness:metal,roughness:.36});const dark=mat(0x111a13),green=mat(0x9bea42,.35),edge=mat(0x486333,.5),white=mat(0xe7ffe0);
+function textTexture(label){const c=document.createElement('canvas');c.width=512;c.height=512;const x=c.getContext('2d');x.fillStyle='#152418';x.fillRect(0,0,512,512);x.strokeStyle='#baff43';x.lineWidth=15;x.strokeRect(12,12,488,488);x.textAlign='center';x.fillStyle='#d5ffc4';x.font='bold 38px Arial';x.fillText('SOLEVAULT',256,110);x.fillStyle='#baff43';x.font='bold 170px Arial';x.fillText('SV',256,300);x.font='bold 30px Arial';x.fillStyle='#d5ffc4';x.fillText(label,256,430);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t}
+function logoTexture(){
+ const c=document.createElement('canvas');c.width=512;c.height=192;const ctx=c.getContext('2d');
+ ctx.clearRect(0,0,512,192);ctx.strokeStyle='#baff43';ctx.lineWidth=8;
+ ctx.beginPath();ctx.moveTo(35,112);ctx.lineTo(70,56);ctx.lineTo(104,112);ctx.lineTo(70,144);ctx.closePath();ctx.stroke();
+ ctx.beginPath();ctx.moveTo(53,110);ctx.lineTo(70,91);ctx.lineTo(87,110);ctx.stroke();
+ ctx.fillStyle='#baff43';ctx.font='900 61px Arial';ctx.fillText('SOLE',131,104);ctx.fillStyle='#ffffff';ctx.fillText('VAULT',131,159);
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;return tex;
+}
+const boxes=[];const ring=new THREE.Group();scene.add(ring);for(let i=0;i<9;i++){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.12,1.5),[edge,edge,edge,edge,new THREE.MeshStandardMaterial({map:textTexture('BOX '+String(i+1).padStart(2,'0')),roughness:.35}),dark]);g.add(body);
+ // Physical embossed brand badge, set slightly forward of the printed front.
+ const badge=new THREE.Group();badge.position.set(0,.04,.772);
+ const badgeBase=new THREE.Mesh(new THREE.BoxGeometry(1.35,.55,.07),new THREE.MeshStandardMaterial({color:0x0b160d,metalness:.65,roughness:.22}));badge.add(badgeBase);
+ const badgeMark=new THREE.Mesh(new THREE.PlaneGeometry(1.21,.45),new THREE.MeshBasicMaterial({map:logoTexture(),transparent:true,depthWrite:false}));badgeMark.position.z=.041;badge.add(badgeMark);g.add(badge);
+ const lid=new THREE.Mesh(new THREE.BoxGeometry(2.35,.23,1.65),green);lid.position.y=.69;g.add(lid);const sole=new THREE.Mesh(new THREE.BoxGeometry(2.3,.1,1.57),dark);sole.position.y=-.63;g.add(sole);const a=i*Math.PI*2/9;g.position.set(Math.sin(a)*4.6,.85,Math.cos(a)*4.6);g.rotation.y=a;ring.add(g);boxes.push({g,lid})}
+let target=0,angle=0,selected=0,drag=false,startX=0,travel=0,prevX=0;const step=Math.PI*2/9;
+function update(){selected=((Math.round(-target/step)%9)+9)%9;document.getElementById('counter').textContent='BOX '+String(selected+1).padStart(2,'0')+' OF 09'}
+function snap(){target=Math.round(target/step)*step;update()}
+function turn(n){target+=n*step;snap();document.getElementById('status').textContent='ROTATING TO BOX '+String(selected+1).padStart(2,'0')}
+document.getElementById('prev').onclick=()=>turn(1);document.getElementById('next').onclick=()=>turn(-1);
+renderer.domElement.addEventListener('pointerdown',e=>{drag=true;startX=prevX=e.clientX;travel=0;renderer.domElement.setPointerCapture(e.pointerId)});
+renderer.domElement.addEventListener('pointermove',e=>{if(!drag)return;const d=e.clientX-prevX;travel+=Math.abs(d);target+=d*.009;prevX=e.clientX;update()});
+renderer.domElement.addEventListener('pointerup',e=>{if(!drag)return;drag=false;if(travel<12){const bounds=renderer.domElement.getBoundingClientRect(),mouse=new THREE.Vector2(((e.clientX-bounds.left)/bounds.width)*2-1,-((e.clientY-bounds.top)/bounds.height)*2+1);const ray=new THREE.Raycaster();ray.setFromCamera(mouse,camera);const hits=ray.intersectObjects(boxes.map(x=>x.g),true);if(hits.length){let node=hits[0].object;while(node.parent&&!boxes.some(b=>b.g===node))node=node.parent;const idx=boxes.findIndex(b=>b.g===node);if(idx>=0){const delta=((idx-selected+4+9)%9)-4;target-=delta*step;document.getElementById('status').textContent='BOX '+String(idx+1).padStart(2,'0')+' SELECTED'}}}snap()});renderer.domElement.addEventListener('pointercancel',()=>{drag=false;snap()});
+const timer=new THREE.Clock();function animate(){requestAnimationFrame(animate);angle+=(target-angle)*.14;ring.rotation.y=angle;const t=timer.getElapsedTime();drawMural(t);animateStreetVideo(t);streetBits.forEach((b,i)=>{b.material.opacity=.2+.35*(.5+.5*Math.sin(t*1.7+i));b.rotation.z+=.002*(i%2?1:-1)});floatingTag.position.y=3.1+Math.sin(t*.7)*.13;
+ pulseRings.forEach((r,i)=>{r.material.opacity=.12+.22*(.5+.5*Math.sin(t*1.65+i*1.8));r.scale.setScalar(1+.015*Math.sin(t*1.3+i));});
+ holograms.forEach(h=>{h.holder.position.y=2.6+Math.sin(t*1.1+h.offset)*.22;h.diamond.rotation.y=t*.55+h.offset;h.diamond.rotation.z=t*.28;h.halo.rotation.z=t*.32+h.offset;});
+ scans.forEach((b,i)=>{b.position.x=-6+i*4+Math.sin(t*.48+i*1.4)*.9;b.material.opacity=.07+.12*(.5+.5*Math.sin(t+i));});
+ crown.rotation.y=t*.19;crown.rotation.z=Math.sin(t*.33)*.09;
+ movingLight.position.x=Math.sin(t*.7)*5;movingLight.position.z=Math.cos(t*.7)*3;
+ boxes.forEach((b,i)=>{
+  // Front is +Z (camera is at +Z). The boxes orbit with ring.rotation.y.
+  // Compute actual orbit depth, not camera-space coordinates from stale matrices.
+  const orbit=i*step+angle;
+  const frontness=(Math.cos(orbit)+1)*.5; // front=1, sides=.5, back=0
+  // Stronger focus: immediate neighbors visibly shrink, not just off-screen boxes.
+  const focus=Math.pow(frontness,5);
+  const desired=.43+.95*focus;
+  b.g.position.y=.85+Math.sin(t*1.5+i*.8)*.025;
+  // Stable reference: never derive the baseline from a previously scaled frame.
+  if(b.baseScale===undefined)b.baseScale=1;
+  const scale=b.baseScale*desired;
+  b.g.scale.setScalar(scale);
+ });;renderer.render(scene,camera)}animate();
+window.addEventListener('resize',()=>{const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)});
+const prizes=['Jordan 4 — Yellow Thunder','Jordan 4 — University Blue','Nike Dunk Low — Panda','Jordan 4 — Yellow Thunder','Jordan 4 — University Blue','Nike Dunk Low — Panda','Jordan 4 — Yellow Thunder','Jordan 4 — University Blue','Nike Dunk Low — Panda'];
+const shoeInfo=[
+ {name:'Jordan 4 — Yellow Thunder',rarity:'LEGENDARY',sv:3800},
+ {name:'Jordan 4 — University Blue',rarity:'EPIC',sv:2400},
+ {name:'Nike Dunk Low — Panda',rarity:'COMMON',sv:450}
+];
+const vaultKey='solevault_v15_collection';
+let savedPairs=[];
+try{const stored=JSON.parse(localStorage.getItem(vaultKey)||'[]');if(Array.isArray(stored))savedPairs=stored.filter(x=>Number.isInteger(x.type)&&x.type>=0&&x.type<3).slice(0,500)}catch(e){}
+// V19.1: backward-compatible collector metadata; existing saved pairs remain unchanged.
+const collectorKey='solevault_v19_collector';
+let collectorState={featuredId:null};
+try{const raw=JSON.parse(localStorage.getItem(collectorKey)||'{}');if(raw&&typeof raw==='object'&&typeof raw.featuredId==='string')collectorState.featuredId=raw.featuredId}catch(e){}
+function persistCollector(){try{localStorage.setItem(collectorKey,JSON.stringify(collectorState))}catch(e){console.warn('Collector preference could not be saved',e)}}
+function collectibleId(pair,index){return pair.id||('SV-LEGACY-'+String(index+1).padStart(5,'0'))}
+function collectorXpTotal(){const unique=new Set(savedPairs.map(p=>p.type)).size;return savedPairs.length*50+unique*150}
+function updateCollector(){
+ const xp=collectorXpTotal(),level=1+Math.floor(xp/500),toward=xp%500;
+ document.getElementById('collectorLevel').textContent=level;
+ document.getElementById('collectorXp').textContent=' '+xp.toLocaleString()+' XP';
+ document.getElementById('collectorNext').textContent=(500-toward)+' XP TO LVL '+(level+1);
+ document.getElementById('collectorMeter').style.width=(toward/500*100)+'%';
+ const unique=new Set(savedPairs.map(p=>p.type)).size;
+ document.getElementById('collectorSetInfo').textContent=unique+'/3 unique styles collected';
+ document.getElementById('collectorSetBadge').textContent=unique===3?'★ SET COMPLETE':'IN PROGRESS';
+ const featured=savedPairs.find((p,i)=>collectibleId(p,i)===collectorState.featuredId);
+ document.getElementById('featuredName').textContent=featured?shoeInfo[featured.type].name:'NO FEATURED SNEAKER';
+ document.getElementById('featuredMeta').textContent=featured?'★ '+shoeInfo[featured.type].rarity+' · '+collectorState.featuredId:'Choose a pair below to showcase';
+ const art=document.getElementById('featuredArt');art.dataset.type=featured?featured.type:'';
+ if(!featured)art.innerHTML='<span style="color:#baff43;font-size:30px">★</span>';
+ else{const src=vaultThumbs.get(featured.type);if(src)art.innerHTML='<img alt="Featured sneaker" src="'+src+'">';else art.innerHTML='<span style="color:#baff43">LOADING…</span>'}
+}
+let viewingSaved=false, currentPullSaved=false;
+let vaultFilter='ALL';
+const vaultThumbs=new Map();
+function updateVaultThumbs(){
+ document.querySelectorAll('.vault-art[data-type]').forEach(el=>{
+  const type=Number(el.dataset.type),src=vaultThumbs.get(type);
+  if(src&&!el.querySelector('img')){el.innerHTML='';const img=document.createElement('img');img.alt=shoeInfo[type].name+' 3D sneaker preview';img.src=src;el.appendChild(img)}
+ });
+}
+async function buildVaultThumbnails(){
+ // Render the real embedded GLB models once; reuse lightweight PNG previews for duplicate cards.
+ const owned=[...new Set(savedPairs.map(p=>p.type))];if(!owned.length)return;
+ let thumbRenderer;
+ try{
+  thumbRenderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+  thumbRenderer.setPixelRatio(1);thumbRenderer.setSize(360,260);thumbRenderer.outputColorSpace=THREE.SRGBColorSpace;
+  const ts=new THREE.Scene();ts.add(new THREE.AmbientLight(0xffffff,2.5));
+  const tl=new THREE.DirectionalLight(0xffffff,4);tl.position.set(-3,6,8);ts.add(tl);
+  const tr=new THREE.DirectionalLight(0xbaff43,2);tr.position.set(4,2,-3);ts.add(tr);
+  const tc=new THREE.PerspectiveCamera(38,360/260,.1,100);tc.position.set(0,2.6,9.5);tc.lookAt(0,0,0);
+  for(const type of owned){
+   if(vaultThumbs.has(type))continue;
+   try{const model=normalizedCopy(await getModel(type),4.3);model.rotation.y=-.48;ts.add(model);thumbRenderer.render(ts,tc);vaultThumbs.set(type,thumbRenderer.domElement.toDataURL('image/png'));ts.remove(model);updateVaultThumbs()}catch(e){console.warn('Vault preview unavailable',type,e)}
+  }
+ }catch(e){console.warn('Vault thumbnails unavailable',e)}finally{if(thumbRenderer)thumbRenderer.dispose()}
+}
+function renderVault(){
+ const list=document.getElementById('vaultList');list.innerHTML='';
+ const visible=savedPairs.filter(p=>vaultFilter==='ALL'||shoeInfo[p.type].rarity===vaultFilter);
+ document.getElementById('vaultEmpty').style.display=savedPairs.length?'none':'block';
+ document.getElementById('vaultCount').textContent=savedPairs.length+' PAIR'+(savedPairs.length===1?'':'S');
+ const unique=new Set(savedPairs.map(p=>p.type)).size;
+ document.getElementById('vaultUnique').textContent=unique+'/3';
+ document.getElementById('vaultValue').textContent=savedPairs.reduce((sum,p)=>sum+shoeInfo[p.type].sv,0).toLocaleString();
+ document.getElementById('vaultDupes').textContent=savedPairs.length-unique;
+ document.getElementById('vaultProgress').style.width=(unique/3*100)+'%';
+ document.getElementById('vaultProgressLabel').textContent=Math.round(unique/3*100)+'% COMPLETE';
+ document.querySelectorAll('.vault-filter').forEach(btn=>{btn.classList.toggle('active',btn.dataset.filter===vaultFilter);btn.setAttribute('aria-pressed',String(btn.dataset.filter===vaultFilter))});
+ if(savedPairs.length&&!visible.length){list.innerHTML='<div style="grid-column:1/-1;padding:20px;color:#aab7a5;text-align:center">No '+vaultFilter.toLowerCase()+' sneakers in your Vault yet.</div>'}
+ visible.slice().reverse().forEach(pair=>{
+  const info=shoeInfo[pair.type],item=document.createElement('button');item.type='button';
+  item.className='vault-card '+info.rarity.toLowerCase();item.setAttribute('aria-label','Inspect '+info.name+' in 3D');
+  const serial=collectibleId(pair,savedPairs.indexOf(pair)).slice(-7).toUpperCase();
+  item.innerHTML='<div class="vault-art" data-type="'+pair.type+'"><span class="vault-preview-loading">LOADING REAL 3D PREVIEW…</span></div><span class="vault-rarity">'+info.rarity+'</span><div class="vault-card-body"><div class="vault-card-name">'+info.name+'</div><div class="vault-card-meta">#'+serial+'</div><div class="vault-card-bottom"><span class="vault-card-value">'+info.sv.toLocaleString()+' SV</span><span class="vault-card-view">VIEW 3D ↗</span></div></div>';
+  item.addEventListener('click',()=>inspectSaved(pair.type));
+  const wrap=document.createElement('div');wrap.className='vault-card-wrap';wrap.appendChild(item);
+  const actions=document.createElement('div');actions.className='vault-card-actions';
+  const id=collectibleId(pair,savedPairs.indexOf(pair));
+  const feature=document.createElement('button');feature.type='button';feature.textContent=collectorState.featuredId===id?'★ FEATURED':'☆ FEATURE';
+  if(collectorState.featuredId===id)feature.className='featured';
+  feature.addEventListener('click',()=>{collectorState.featuredId=id;persistCollector();renderVault()});
+  const passport=document.createElement('button');passport.type='button';passport.textContent='ID / DETAILS';
+  passport.addEventListener('click',()=>{const date=pair.date?new Date(pair.date).toLocaleDateString():'Earlier collection';document.getElementById('passportTitle').textContent=info.name;document.getElementById('passportRarity').textContent=info.rarity;document.getElementById('passportDate').textContent=date;document.getElementById('passportValue').textContent=info.sv.toLocaleString()+' SV';document.getElementById('passportId').textContent='COLLECTIBLE ID: '+id;document.getElementById('passportDialog').classList.add('show')});
+  actions.append(feature,passport);wrap.appendChild(actions);list.appendChild(wrap);
+ });
+ updateVaultThumbs();updateCollector();
+}
+document.getElementById('passportClose').addEventListener('click',()=>document.getElementById('passportDialog').classList.remove('show'));document.getElementById('passportDialog').addEventListener('click',e=>{if(e.target.id==='passportDialog')e.currentTarget.classList.remove('show')});
+document.getElementById('vaultFilters').addEventListener('click',e=>{const btn=e.target.closest('[data-filter]');if(!btn)return;vaultFilter=btn.dataset.filter;renderVault()});
+function savePull(){
+ if(phase!=='inspect'||viewingSaved||currentPullSaved)return;
+ const type=prizeIndex%3;
+ savedPairs.push({type,id:'SV-'+Date.now()+'-'+Math.floor(Math.random()*100000),date:new Date().toISOString()});
+ try{localStorage.setItem(vaultKey,JSON.stringify(savedPairs))}catch(e){document.getElementById('resultSub').textContent='STORAGE BLOCKED — COLLECTION WILL NOT PERSIST';return}
+ currentPullSaved=true;document.getElementById('savePull').textContent='SAVED TO VAULT ✓';renderVault();buildVaultThumbnails();
+}
+document.getElementById('savePull').addEventListener('click',savePull);
+renderVault();
+const palettes=[0xed4334,0x65c8ef,0xf4ca42,0xc4a8ef,0xe7e7dc,0xbaff43,0xf08f49,0xf27a9d,0x7b8ea8];
+const cinemaTop=document.getElementById('cinemaTop'),rarityTag=document.getElementById('rarityTag'),fx=document.getElementById('cinematicFX');
+const ratingDisplay=document.getElementById('revealRating');
+function applyRarity(type){const rarity=shoeInfo[type%3].rarity.toLowerCase();overlay.classList.remove('rarity-common','rarity-epic','rarity-legendary','rating-visible','reveal-shake');overlay.classList.add('rarity-'+rarity);ratingDisplay.innerHTML=(rarity==='legendary'?'99':rarity==='epic'?'93':'82')+'<span>'+rarity.toUpperCase()+' PULL</span>'; }
+
+const overlay=document.getElementById('overlay'),hint=document.getElementById('revealHint'),revealMount=document.getElementById('reveal3d');
+const rScene=new THREE.Scene(),rCam=new THREE.PerspectiveCamera(39,1,.1,100);rCam.position.set(0,2.4,9.5);rCam.lookAt(0,.55,0);
+const rRenderer=new THREE.WebGLRenderer({antialias:true,alpha:true});rRenderer.setPixelRatio(Math.min(devicePixelRatio,1.6));rRenderer.outputColorSpace=THREE.SRGBColorSpace;revealMount.appendChild(rRenderer.domElement);
+rScene.add(new THREE.AmbientLight(0xffffff,2));const key=new THREE.DirectionalLight(0xffffff,4);key.position.set(-4,8,8);rScene.add(key);const back=new THREE.PointLight(0xbaff43,95,18);back.position.set(3,3,-2);rScene.add(back);
+// V18.3 cinematic reveal lighting: independent of the approved picker carousel.
+const revealAccent=new THREE.PointLight(0xbaff43,0,13);revealAccent.position.set(-2,2.8,3);rScene.add(revealAccent);
+const revealRings=new THREE.Group();rScene.add(revealRings);
+for(let i=0;i<3;i++){
+ const ringMesh=new THREE.Mesh(new THREE.TorusGeometry(2.15+i*.42,.014,6,72),new THREE.MeshBasicMaterial({color:0xbaff43,transparent:true,opacity:.0,depthWrite:false}));
+ ringMesh.rotation.x=Math.PI/2.9+i*.17;ringMesh.position.y=.6+i*.27;revealRings.add(ringMesh);
+}
+let revealTone=0xbaff43;
+function setRevealTone(index){const rarity=shoeInfo[index%3].rarity;revealTone=rarity==='LEGENDARY'?0xffc04e:rarity==='EPIC'?0xc18aff:0xbaff43;revealAccent.color.setHex(revealTone);back.color.setHex(revealTone);revealRings.children.forEach(m=>m.material.color.setHex(revealTone));}
+const showGroup=new THREE.Group();rScene.add(showGroup);const shoeGroup=new THREE.Group();showGroup.add(shoeGroup);
+const boxGroup=new THREE.Group();showGroup.add(boxGroup);const shoeMaterials=[];
+function mesh(geometry,material,parent,x=0,y=0,z=0){const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);parent.add(m);return m}
+const boxMat=mat(0x1b2c1b,.15),lidMat=mat(0xbaff43,.4);
+const bottom=mesh(new THREE.BoxGeometry(4.3,1.3,2.5),boxMat,boxGroup,0,-.65,0);
+const boxBadge=mesh(new THREE.PlaneGeometry(2.4,.9),new THREE.MeshBasicMaterial({map:logoTexture(),transparent:true,side:THREE.DoubleSide}),boxGroup,0,-.56,1.258);
+const lidPivot=new THREE.Group();lidPivot.position.set(-2.13,.03,0);boxGroup.add(lidPivot);
+mesh(new THREE.BoxGeometry(4.55,.26,2.7),lidMat,lidPivot,2.13,.12,0);
+const modelData=window.SV_MODEL_PARTS.map(parts=>parts.join(""));
+let modelReady=false, modelError='';
+const loader=new GLTFLoader();
+const cache=new Map();let actualBox=null,boxTop=null;
+async function getModel(index){
+ if(cache.has(index))return cache.get(index);
+ const raw=atob(modelData[index]),bytes=new Uint8Array(raw.length);
+ for(let i=0;i<raw.length;i+=65536){for(let k=i;k<Math.min(i+65536,raw.length);k++)bytes[k]=raw.charCodeAt(k)}
+ const result=await new Promise((ok,bad)=>loader.parse(bytes.buffer,'',ok,bad));
+ cache.set(index,result.scene);return result.scene;
+}
+function normalizedCopy(source,maxWidth){
+ const wrap=new THREE.Group(),obj=source.clone(true);wrap.add(obj);
+ const bb=new THREE.Box3().setFromObject(obj),size=bb.getSize(new THREE.Vector3()),center=bb.getCenter(new THREE.Vector3());
+ obj.position.sub(center);wrap.scale.setScalar(maxWidth/Math.max(size.x,size.y,size.z));return wrap;
+}
+async function loadRealShoe(index){
+ const obj=normalizedCopy(await getModel(index),4.15);
+ shoeGroup.clear();shoeGroup.add(obj);
+ shoeGroup.rotation.set(0,-.55,0);shoeGroup.position.y=-.65;shoeGroup.scale.setScalar(.01);
+}
+async function loadRealBox(){
+ if(actualBox)return;
+ const source=await getModel(3);
+ actualBox=normalizedCopy(source,4.5);
+ // Replace the temporary generic reveal box with the imported shoebox.
+ boxGroup.add(actualBox);bottom.visible=false;boxBadge.visible=false;lidPivot.visible=false;
+ boxTop=actualBox.getObjectByName('Plane_Plane_002_Material_001_TOP_0');
+ // Keep a separate fallback lid if the supplied model has no identifiable top.
+ if(boxTop){
+  // Detach the genuine lid from the imported model hierarchy while preserving its world pose.
+  boxGroup.updateWorldMatrix(true,true);
+  const bounds=new THREE.Box3().setFromObject(boxTop);
+  const hingeWorld=new THREE.Vector3(bounds.min.x,bounds.max.y,bounds.getCenter(new THREE.Vector3()).z);
+  const hingeLocal=boxGroup.worldToLocal(hingeWorld.clone());
+  realLidHinge=new THREE.Group();realLidHinge.position.copy(hingeLocal);boxGroup.add(realLidHinge);
+  realLidHinge.attach(boxTop);
+ }else{lidPivot.visible=true;}
+
+ // Replace the carousel's temporary boxes with clones of the imported model.
+ for(const entry of boxes){
+  const imported=normalizedCopy(source,2.25);entry.g.add(imported);
+  entry.g.children.forEach(child=>{if(child!==imported)child.visible=false});
+ }
+}
+
+let realLidHinge=null;
+let liftProgress=0,liftGesture=null,liftCommitted=false;
+function setLidProgress(p){liftProgress=Math.max(0,Math.min(1,p));lidPivot.rotation.z=liftProgress*1.8;if(realLidHinge)realLidHinge.rotation.z=liftProgress*1.65;}
+
+let svAudioCtx=null,svThunderPlayed=false;
+function playSVThunder(){
+ try{
+  const AudioContextCtor=window.AudioContext||window.webkitAudioContext;if(!AudioContextCtor)return;
+  svAudioCtx=svAudioCtx||new AudioContextCtor();if(svAudioCtx.state==='suspended')svAudioCtx.resume().catch(()=>{});
+  const ctx=svAudioCtx,t=ctx.currentTime,len=Math.floor(ctx.sampleRate*.8),buffer=ctx.createBuffer(1,len,ctx.sampleRate),data=buffer.getChannelData(0);
+  let previous=0;for(let i=0;i<len;i++){const n=Math.random()*2-1;previous=(previous*.88+n*.12);data[i]=(n*.4+previous*.6);}
+  const source=ctx.createBufferSource();source.buffer=buffer;
+  const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.setValueAtTime(2600,t);filter.frequency.exponentialRampToValueAtTime(130,t+.7);
+  const gain=ctx.createGain();gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.23,t+.015);gain.gain.exponentialRampToValueAtTime(.0001,t+.8);
+  source.connect(filter);filter.connect(gain);gain.connect(ctx.destination);source.start(t);source.stop(t+.8);
+  const snap=ctx.createOscillator(),snapGain=ctx.createGain();snap.type='sawtooth';snap.frequency.setValueAtTime(165,t);snap.frequency.exponentialRampToValueAtTime(48,t+.22);snapGain.gain.setValueAtTime(.16,t);snapGain.gain.exponentialRampToValueAtTime(.0001,t+.24);snap.connect(snapGain);snapGain.connect(ctx.destination);snap.start(t);snap.stop(t+.25);
+ }catch(err){console.warn('SV sound unavailable:',err)}
+}
+const svIdent=document.getElementById('svIdent');
+let phase='idle',phaseStart=0,spinAngle=0,spinPointer=null,spinLast=0,prizeIndex=0;
+function fitReveal(){const w=revealMount.clientWidth||340,h=revealMount.clientHeight||340;rCam.aspect=w/h;rCam.updateProjectionMatrix();rRenderer.setSize(w,h)}
+async function openBox(){viewingSaved=false;currentPullSaved=false;document.getElementById('savePull').style.display='none';document.getElementById('savePull').textContent='SAVE TO MY VAULT +';prizeIndex=(Number.isInteger(window.sv193Prize)?window.sv193Prize:selected);window.sv193Prize=undefined;applyRarity(prizeIndex);setRevealTone(prizeIndex);fx.className='';svIdent.classList.remove('active');overlay.classList.remove('box-tremor');rarityTag.hidden=true;cinemaTop.textContent='THE VAULT IS OPENING';overlay.classList.remove('vault-inspecting');overlay.classList.add('show');fitReveal();phase='idle';cinemaTop.textContent='LOADING REAL 3D SNEAKER…';document.getElementById('resultSub').textContent='PREPARING THE MODEL';try{await loadRealShoe(prizeIndex%3);await loadRealBox()}catch(e){modelError=String(e);console.error(e);document.getElementById('resultSub').textContent='MODEL ERROR: '+modelError;cinemaTop.textContent='MODEL COULD NOT LOAD';return}phase='approach';phaseStart=performance.now();liftGesture=null;liftCommitted=false;setLidProgress(0);hint.classList.add('hidden');document.getElementById('resultTitle').textContent='UNBOXING BOX '+String(prizeIndex+1).padStart(2,'0');document.getElementById('resultSub').textContent='THE HEAT IS COMING…';rCam.position.set(0,2.4,9.5);rCam.lookAt(0,.55,0);revealAccent.intensity=0;showGroup.position.set(0,-.3,0);showGroup.scale.setScalar(.55);boxGroup.visible=true;lidPivot.rotation.z=0;if(realLidHinge)realLidHinge.rotation.z=0;boxGroup.position.y=0;spinAngle=-.55;}
+document.getElementById('open').onclick=openBox;
+async function inspectSaved(type){
+ if(overlay.classList.contains('show'))return;
+ viewingSaved=true;currentPullSaved=true;prizeIndex=type;applyRarity(type);setRevealTone(type);document.getElementById('savePull').style.display='none';
+ overlay.classList.add('show');fitReveal();phase='idle';hint.classList.add('hidden');
+ cinemaTop.textContent='LOADING YOUR SNEAKER…';document.getElementById('resultTitle').textContent='YOUR COLLECTION';
+ document.getElementById('resultSub').textContent='PREPARING 3D MODEL';
+ try{await loadRealShoe(type)}catch(e){document.getElementById('resultSub').textContent='MODEL COULD NOT LOAD: '+e.message;return}
+ boxGroup.visible=false;shoeGroup.scale.setScalar(1);shoeGroup.position.y=1;spinAngle=-.55;
+ phase='inspect';overlay.classList.add('rating-visible');hint.classList.remove('hidden');rarityTag.hidden=false;
+ rarityTag.textContent=shoeInfo[type].rarity+' • '+shoeInfo[type].sv.toLocaleString()+' SV BASE';
+ overlay.classList.add('vault-inspecting');cinemaTop.textContent='YOUR SNEAKER VAULT';document.getElementById('resultTitle').textContent=shoeInfo[type].name;
+ document.getElementById('resultSub').textContent='OWNED DIGITAL COLLECTIBLE • DRAG TO INSPECT';
+}
+buildVaultThumbnails();
+document.getElementById('close').onclick=()=>{overlay.classList.remove('show','vault-inspecting');phase='idle';fx.className='';overlay.classList.remove('rating-visible','reveal-shake','box-tremor');svIdent.classList.remove('active')};
+rRenderer.domElement.style.touchAction='none';
+rRenderer.domElement.addEventListener('pointerdown',e=>{
+ if(phase==='lid'){liftGesture={id:e.pointerId,startY:e.clientY,startProgress:liftProgress};rRenderer.domElement.setPointerCapture(e.pointerId);e.preventDefault();return;}
+ if(phase==='inspect'){spinPointer=e.pointerId;spinLast=e.clientX;rRenderer.domElement.setPointerCapture(e.pointerId);}
+});
+rRenderer.domElement.addEventListener('pointermove',e=>{
+ if(phase==='lid'&&liftGesture?.id===e.pointerId){setLidProgress(liftGesture.startProgress+(liftGesture.startY-e.clientY)/175);e.preventDefault();return;}
+ if(spinPointer===e.pointerId&&phase==='inspect'){spinAngle+=(e.clientX-spinLast)*.012;spinLast=e.clientX;}
+});
+function finishLift(e){
+ if(liftGesture?.id===e.pointerId){liftGesture=null;if(phase==='lid'&&liftProgress>=.68){phase='lidFinish';phaseStart=performance.now();}else if(phase==='lid'){setLidProgress(0);cinemaTop.textContent='SWIPE UP FURTHER TO OPEN';} }
+ if(spinPointer===e.pointerId)spinPointer=null;
+}
+rRenderer.domElement.addEventListener('pointerup',finishLift);
+rRenderer.domElement.addEventListener('pointercancel',finishLift);
+function ease(t){return 1-Math.pow(1-Math.max(0,Math.min(1,t)),3)}
+function revealLoop(now){requestAnimationFrame(revealLoop);if(phase==='idle'){if(overlay.classList.contains('show'))rRenderer.render(rScene,rCam);return;}const sec=(now-phaseStart)/1000;
+// Slow camera push, orbiting light and expanding neon halos during the pull.
+const cinematic=phase==='charge'||phase==='rise';
+const riseP=phase==='rise'?Math.min(1,sec/1.5):0;
+const chargeP=phase==='charge'?Math.min(1,sec/1.05):0;
+const camZ=phase==='approach'?9.5-.35*ease(sec/.9):phase==='charge'?9.15-.85*chargeP:phase==='rise'?8.3-.65*riseP:phase==='inspect'?8.05:9.15;
+rCam.position.z+=(camZ-rCam.position.z)*.08;
+rCam.position.x+=((cinematic?Math.sin(now*.0008)*.22:0)-rCam.position.x)*.035;
+rCam.lookAt(0,.6+(phase==='rise'?riseP*.45:0),0);
+revealAccent.intensity+=( (cinematic?75+25*Math.sin(now*.012):phase==='inspect'?45:0)-revealAccent.intensity)*.09;
+revealAccent.position.x=Math.sin(now*.0016)*3;revealAccent.position.z=2+Math.cos(now*.0016)*2;
+revealRings.visible=cinematic;
+revealRings.children.forEach((m,i)=>{m.rotation.z=now*.00018*(i%2?1:-1);m.material.opacity=cinematic?(phase==='charge'?.16+.12*chargeP:.28*(1-riseP)):0;m.scale.setScalar(1+(phase==='rise'?riseP*.5:chargeP*.12));});
+
+if(phase==='approach'){const p=ease(sec/.9);showGroup.scale.setScalar(.55+p*.45);showGroup.position.y=-.3+p*.3;if(sec>.95){phase='lid';phaseStart=now;cinemaTop.textContent='SWIPE UP TO LIFT THE LID';document.getElementById('resultSub').textContent='DRAG UP ON THE BOX TO OPEN IT';}}
+else if(phase==='lid'){setLidProgress(liftProgress)}
+else if(phase==='lidFinish'){const p=ease(sec/.38);setLidProgress(liftProgress+(1-liftProgress)*p);if(sec>.4){setLidProgress(1);phase='charge';phaseStart=now;cinemaTop.textContent=shoeInfo[prizeIndex%3].rarity==='LEGENDARY'?'LEGENDARY HEAT DETECTED':shoeInfo[prizeIndex%3].rarity==='EPIC'?'EPIC PULL INCOMING':'WHAT DID YOU PULL?';document.getElementById('resultSub').textContent='THE REVEAL IS STARTING';fx.className='charging';overlay.classList.add('box-tremor')}}
+else if(phase==='charge'){if(sec>1.05){phase='brand';phaseStart=now;overlay.classList.remove('box-tremor');svIdent.classList.add('active');svThunderPlayed=false;cinemaTop.textContent='SOLEVAULT PRESENTS';boxGroup.visible=false;fx.className='';}}
+else if(phase==='brand'){if(!svThunderPlayed&&sec>=1.81){svThunderPlayed=true;playSVThunder()}if(sec>3.7){phase='rise';phaseStart=now;cinemaTop.textContent='HEAT UNLOCKED';fx.className='burst';svIdent.classList.remove('active');overlay.classList.add('reveal-shake');setTimeout(()=>overlay.classList.remove('reveal-shake'),650)}}
+else if(phase==='rise'){const p=ease(sec/1.5);shoeGroup.scale.setScalar(.01+p*.99);shoeGroup.position.y=-.65+p*1.65;boxGroup.position.y=-p*.8;shoeGroup.rotation.y=-.55+p*.35;if(sec>1.6){phase='inspect';phaseStart=now;overlay.classList.add('rating-visible');hint.classList.remove('hidden');rarityTag.hidden=false;rarityTag.textContent=shoeInfo[prizeIndex%3].rarity+' • '+shoeInfo[prizeIndex%3].sv.toLocaleString()+' SV BASE';document.getElementById('savePull').style.display='block';cinemaTop.textContent='THE REVEAL';document.getElementById('resultTitle').textContent=prizes[prizeIndex];document.getElementById('resultSub').textContent='IMPORTED 3D MODEL • DRAG TO INSPECT • NO PHYSICAL PRIZE'}}
+else if(phase==='inspect'){boxGroup.visible=false;shoeGroup.position.y=1.0+Math.sin(now*.002)*.08;shoeGroup.rotation.y+=(spinAngle-shoeGroup.rotation.y)*.17;}
+rRenderer.render(rScene,rCam)}requestAnimationFrame(revealLoop);
+window.addEventListener('resize',()=>{if(phase!=='idle')fitReveal()});
+// Load the actual shoebox for the picker on first launch, not only on first reveal.
+// Leave the functional branded placeholders visible until the imported mesh is ready.
+requestAnimationFrame(()=>loadRealBox().catch(e=>{
+ console.error('Could not preload real shoebox for carousel:',e);
+ loading.textContent='SHOEBOX MODEL UNAVAILABLE — USING SOLEVAULT BOXES';
+}));
+
+
+}catch(e){loading.textContent='3D VIEW UNAVAILABLE';error.style.display='block';error.textContent='The 3D engine could not load. This test requires an internet connection in Chrome. Details: '+e.message;}
+</script><div id="sv-chamber" role="dialog" aria-modal="true" aria-label="Drop chamber unlocking"><div class="ch-door left"></div><div class="ch-door right"></div><div class="ch-bolt"></div><div class="ch-center"><h2>SOLEVAULT</h2><p id="ch-text">SECURITY OVERRIDE</p></div><button id="ch-skip" type="button">SKIP ANIMATION →</button></div><script id="sv193logic">
+(function(){
+const tiers=[{name:'COMMON',cost:100,weights:[80,18,2]},{name:'UNCOMMON',cost:250,weights:[55,38,7]},{name:'RARE',cost:600,weights:[20,60,20]},{name:'EPIC',cost:1200,weights:[0,75,25]}];
+const key='solevault_v193_economy';let state={balance:1000,lastDaily:'',epicMisses:0};try{const v=JSON.parse(localStorage.getItem(key)||'null');if(v&&Number.isSafeInteger(v.balance)&&v.balance>=0&&v.balance<100000000)state={...state,...v}}catch(e){}
+let tier=0,entry=null;
+const pendingKey='solevault_v1943_paid_drop';
+try{const v=JSON.parse(localStorage.getItem(pendingKey)||'null');if(v&&Number.isInteger(v.prize)&&v.prize>=0&&v.prize<=2&&Number.isInteger(v.tier)&&v.tier>=0&&v.tier<4)entry=v}catch(e){}
+const paidSave=()=>{try{if(entry)localStorage.setItem(pendingKey,JSON.stringify(entry));else localStorage.removeItem(pendingKey)}catch(e){console.warn('Paid drop persistence unavailable',e)}};
+let chamberTimer=[];
+const chamber=$id=>document.getElementById($id);
+function unlockChamber(){const el=chamber('sv-chamber');el.classList.remove('open','surge');el.classList.add('active');chamber('ch-text').textContent='SECURITY OVERRIDE';chamberTimer.forEach(clearTimeout);chamberTimer=[];let done=false;
+const finish=()=>{if(done)return;done=true;chamberTimer.forEach(clearTimeout);el.classList.remove('active','open','surge');chamber('sv-carousel-slot').classList.add('chamber-ready');requestAnimationFrame(()=>{window.dispatchEvent(new Event('resize'));setTimeout(()=>window.dispatchEvent(new Event('resize')),130)});chamber('sv-carousel-start').scrollIntoView({behavior:'smooth',block:'start'});};
+chamber('ch-skip').onclick=finish;chamberTimer.push(setTimeout(()=>{el.classList.add('surge');chamber('ch-text').textContent='ACCESS GRANTED'},750));chamberTimer.push(setTimeout(()=>{el.classList.add('open');chamber('ch-text').textContent='DROP CHAMBER UNLOCKED'},1750));chamberTimer.push(setTimeout(finish,2900));}
+
+const $=id=>document.getElementById(id);const persist=()=>{try{localStorage.setItem(key,JSON.stringify(state))}catch(e){$('sv-drop-message').textContent='Browser storage unavailable. Your SV may not persist.'}};
+function balance(){document.querySelectorAll('.sv-balance').forEach(el=>el.textContent=state.balance.toLocaleString());const today=new Date().toLocaleDateString('en-CA');$('sv-daily').disabled=state.lastDaily===today;$('sv-daily-status').textContent=state.lastDaily===today?'Daily SV already claimed. Come back tomorrow.':'Daily SV is free; no purchase required.'}
+function page(which){document.querySelectorAll('.svpage').forEach(el=>el.classList.toggle('active',el.id==='sv-'+which));document.querySelectorAll('.svnav [data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===which));window.scrollTo(0,0);if(which==='drops'){if(!entry)chamber('sv-carousel-slot').classList.remove('chamber-ready');requestAnimationFrame(()=>{window.dispatchEvent(new Event('resize'));setTimeout(()=>window.dispatchEvent(new Event('resize')),120)})}}
+document.querySelectorAll('[data-page],[data-go]').forEach(el=>el.addEventListener('click',()=>page(el.dataset.page||el.dataset.go)));
+$('sv-carousel-slot').appendChild($('sv-carousel-start'));$('sv-vault-slot').appendChild($('vaultPanel'));
+if('ResizeObserver' in window){new ResizeObserver(()=>{if(document.getElementById('stage').clientWidth>0&&document.getElementById('stage').clientHeight>0)window.dispatchEvent(new Event('resize'))}).observe(document.getElementById('stage'));}
+$('sv-daily').onclick=()=>{const today=new Date().toLocaleDateString('en-CA');if(state.lastDaily===today)return;state.balance+=150;state.lastDaily=today;persist();balance()};
+function tierUi(){if(entry){$('sv-enter').textContent='RESUME PAID DROP • 0 SV';return}document.querySelectorAll('[data-tier]').forEach(b=>b.classList.toggle('chosen',+b.dataset.tier===tier));$('sv-enter').textContent=`ENTER ${tiers[tier].name} DROP • ${tiers[tier].cost.toLocaleString()} SV`}
+document.querySelectorAll('[data-tier]').forEach(b=>b.onclick=()=>{tier=+b.dataset.tier;tierUi()});
+function pick(t){if(t===3&&state.epicMisses>=10)return 0;let r=Math.random()*100;const w=tiers[t].weights;return r<w[0]?2:r<w[0]+w[1]?1:0}
+function readyPaid(){if(!entry)return;chamber('sv-carousel-slot').classList.add('chamber-ready');$('open').disabled=false;$('open').textContent='OPEN PAID DROP ⚡';$('sv-drop-message').textContent='Your paid drop is ready. Open your box — no additional SV charge.';}
+$('sv-enter').onclick=()=>{if(entry){$('sv-drop-message').textContent='You already have a paid drop waiting. Opening the chamber again costs nothing.';unlockChamber();readyPaid();return}const t=tiers[tier];if(state.balance<t.cost){$('sv-drop-message').textContent='Not enough SV. Claim your daily reward or choose a cheaper tier.';return}
+entry={tier,prize:pick(tier),cost:t.cost};state.balance-=t.cost;if(tier===3)state.epicMisses=entry.prize===0?0:state.epicMisses+1;paidSave();persist();balance();$('sv-drop-message').textContent=`${t.name} drop purchased. Unlocking chamber...`;readyPaid();unlockChamber();};
+$('open').addEventListener('click',ev=>{if(!entry){ev.stopImmediatePropagation();$('sv-drop-message').textContent='Purchase a drop tier to unlock the carousel.';return}window.sv193Prize=entry.prize;entry=null;paidSave();$('open').disabled=true;$('open').textContent='CHOOSE ANOTHER DROP TO OPEN';chamber('sv-carousel-slot').classList.remove('chamber-ready');},true);
+if(entry){$('sv-drop-message').textContent='Your previously paid drop is waiting — resume without paying again.';$('sv-enter').textContent='RESUME PAID DROP • 0 SV';}else{$('open').disabled=true}
+// V19.4: daily challenges and Sneaker Match, using the existing economy state.
+const earnKey='solevault_v194_earn';
+const day=()=>new Date().toLocaleDateString('en-CA');
+let earn={date:day(),wins:0,earnedSv:0,played:0,claimed:{},visitedVault:false,openedDrop:false};
+try{const old=JSON.parse(localStorage.getItem(earnKey)||'null');if(old&&old.date===day())earn={...earn,...old,claimed:old.claimed||{}}}catch(e){}
+function earnSave(){try{localStorage.setItem(earnKey,JSON.stringify(earn))}catch(e){$('match-message').textContent='Storage is unavailable; rewards may not persist.'}}
+function resetEarnDay(){if(earn.date!==day()){earn={date:day(),wins:0,earnedSv:0,played:0,claimed:{},visitedVault:false,openedDrop:false};earnSave()}}
+const quests=[{id:'checkin',name:'DAILY CHECK-IN',description:'Claim your free daily SV',reward:50,done:()=>state.lastDaily===day()},{id:'vault',name:'VAULT EXPLORER',description:'Visit your sneaker Vault',reward:75,done:()=>earn.visitedVault},{id:'drop',name:'FRESH KICKS',description:'Open a paid shoebox drop',reward:100,done:()=>earn.openedDrop},{id:'match',name:'MATCH MASTER',description:'Finish two Sneaker Match rounds',reward:150,done:()=>earn.played>=2}];
+function renderEarn(){resetEarnDay();$('earn-date').textContent=`DAILY CHALLENGES • ${day()} • ${quests.filter(q=>earn.claimed[q.id]).length}/${quests.length} CLAIMED`;
+$('earn-quests').innerHTML=quests.map(q=>`<div class="quest"><div><b>${q.name}</b><small>${q.description} · +${q.reward} SV</small></div><button type="button" data-claim="${q.id}" ${!q.done()||earn.claimed[q.id]?'disabled':''}>${earn.claimed[q.id]?'CLAIMED':q.done()?'CLAIM +'+q.reward:'LOCKED'}</button></div>`).join('');
+$('match-limit').textContent=`Heat Check rewards today: ${Math.min(300,Number(earn.earnedSv??earn.wins*75)||0)}/300 SV • ${Math.max(0,300-(Number(earn.earnedSv??earn.wins*75)||0))} SV remaining`;}
+$('earn-quests').addEventListener('click',e=>{const id=e.target.closest('[data-claim]')?.dataset.claim;const q=quests.find(x=>x.id===id);if(!q)return;resetEarnDay();if(earn.claimed[id]||!q.done())return;earn.claimed[id]=true;state.balance+=q.reward;earnSave();persist();balance();renderEarn()});
+document.querySelectorAll('[data-page="earn"]').forEach(b=>b.addEventListener('click',renderEarn));
+document.querySelectorAll('[data-page="vault"],[data-go="vault"]').forEach(b=>b.addEventListener('click',()=>{resetEarnDay();earn.visitedVault=true;earnSave();renderEarn()}));
+$('sv-daily').addEventListener('click',()=>{renderEarn()});
+$('open').addEventListener('click',()=>{if(window.sv193Prize===undefined)return;resetEarnDay();earn.openedDrop=true;earnSave();renderEarn()},false);
+let cards=[],flipped=[],matched=0,turns=0,locked=false,roundActive=false,roundToken=0;
+let mode=2,remaining=40,combo=0,bestCombo=0,misses=0,clockHandle=null,startedAt=0;
+const modes=[{name:'ROOKIE',pairs:6,seconds:60,reward:25},{name:'STREET',pairs:8,seconds:45,reward:50},{name:'PRO',pairs:10,seconds:40,reward:75},{name:'LEGEND',pairs:12,seconds:35,reward:125}];
+const shoes=[['👟','THUNDER','#f8d74c'],['👟','PANDA','#ffffff'],['👟','BLUE 4','#77c7ff'],['👟','NEON','#baff43'],['👟','RETRO','#ffa577'],['👟','SHADOW','#b2a3df'],['👟','VOLT','#dcff45'],['👟','ICE','#a6f5ef'],['👟','FIRE','#ff8178'],['👟','ROYAL','#678eff'],['👟','GOLD','#f6c763'],['👟','ONYX','#c9d2c8']];
+// These are stylized sneaker tokens, not licensed product images.
+function updateHeat(){const m=modes[mode];$('match-counter').textContent=`${matched} / ${m.pairs}`;$('heat-clock').textContent=`TIME: ${remaining.toFixed(1)}s`;$('heat-combo').textContent=`COMBO: ${combo} (BEST ${bestCombo})`;$('heat-mistakes').textContent=`MISSES: ${misses}`;}
+function stopClock(){if(clockHandle!==null){clearInterval(clockHandle);clockHandle=null}}
+function finishHeat(won){if(!roundActive)return;roundActive=false;stopClock();roundToken++;resetEarnDay();earn.played++;let award=0;if(won){const already=Math.min(300,Number(earn.earnedSv??earn.wins*75)||0);award=Math.min(modes[mode].reward,Math.max(0,300-already));if(award){earn.earnedSv=already+award;earn.wins++;state.balance+=award;persist();balance()}}earnSave();let matchXp=0;if(won){matchXp=15+modes[mode].pairs*2+(misses===0?15:0);let x={total:0};try{x=JSON.parse(localStorage.getItem('solevault_v196_xp')||'{}')||{total:0}}catch(e){}x.total=Math.max(0,Math.floor(Number(x.total)||0))+matchXp;try{localStorage.setItem('solevault_v196_xp',JSON.stringify(x))}catch(e){}if(typeof updateCollector==='function')updateCollector();window.dispatchEvent(new CustomEvent('sv-arcade-xp',{detail:{sv:award,xp:matchXp,mode:'SNEAKER MATCH'}}))}const flawless=won&&misses===0;$('match-message').innerHTML=won?`<b>${flawless?'<span class="heat-flawless">✦ FLAWLESS HEAT CHECK! ✦</span>':'HEAT CHECK CLEARED!'}</b> +${award} SV · +${matchXp} XP · ${turns} turns · Best combo ${bestCombo}${award===0?' · Daily SV cap reached':''}`:'TIME UP! No SV this round. Try again or lower the difficulty.';$('match-start').textContent='PLAY AGAIN →';renderEarn();drawCards()}
+function drawCards(){const grid=$('match-grid');grid.replaceChildren();cards.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.className='match-card'+(flipped.includes(i)?' faceup':'')+(v.done?' matched':'');if(v.done||flipped.includes(i)){const art=document.createElement('span');art.className='shoe-art';const glyph=document.createElement('i');glyph.textContent=shoes[v.id][0];glyph.style.filter=`drop-shadow(0 0 6px ${shoes[v.id][2]})`;const name=document.createElement('small');name.textContent=shoes[v.id][1];art.append(glyph,name);b.appendChild(art)}else b.textContent='SV';b.setAttribute('aria-label',v.done||flipped.includes(i)?'Sneaker '+shoes[v.id][1]:'Hidden sneaker card');b.disabled=!roundActive||v.done||flipped.includes(i)||locked;b.onclick=()=>flipCard(i);grid.appendChild(b)});updateHeat()}
+function flipCard(i){if(!roundActive||locked||cards[i].done||flipped.includes(i))return;flipped.push(i);drawCards();if(flipped.length===2){turns++;const [a,b]=flipped;if(cards[a].id===cards[b].id){cards[a].done=cards[b].done=true;matched++;combo++;bestCombo=Math.max(bestCombo,combo);flipped=[];if(matched===modes[mode].pairs){finishHeat(true)}else drawCards()}else{misses++;combo=0;locked=true;updateHeat();const token=roundToken;setTimeout(()=>{if(token!==roundToken||!roundActive)return;flipped=[];locked=false;drawCards()},650)}}}
+document.querySelectorAll('[data-mode]').forEach(btn=>btn.onclick=()=>{if(roundActive){$('match-message').textContent='Finish or restart the current round before changing difficulty.';return}mode=+btn.dataset.mode;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('selected',+b.dataset.mode===mode));remaining=modes[mode].seconds;updateHeat();$('match-message').textContent=`${modes[mode].name}: match ${modes[mode].pairs} pairs in ${remaining} seconds for up to ${modes[mode].reward} SV.`});
+$('match-start').onclick=()=>{resetEarnDay();stopClock();roundToken++;const m=modes[mode];cards=[...Array(m.pairs).keys(),...Array(m.pairs).keys()].map(id=>({id,done:false}));for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}flipped=[];matched=0;turns=0;misses=0;combo=0;bestCombo=0;locked=false;roundActive=true;remaining=m.seconds;startedAt=performance.now();$('match-message').textContent=`${m.name} HEAT CHECK! Match every sneaker before time runs out.`;$('match-start').textContent='RESTART ROUND ↻';drawCards();const token=roundToken;clockHandle=setInterval(()=>{if(token!==roundToken||!roundActive)return;remaining=Math.max(0,m.seconds-(performance.now()-startedAt)/1000);updateHeat();if(remaining<=0)finishHeat(false)},100);renderEarn()};
+remaining=modes[mode].seconds;drawCards();renderEarn();
+
+// V19.5 Arcade: same SV economy, separate daily earning ledger and separate 3D engine.
+const arcadeKey='solevault_v195_arcade';
+const arcadeDay=()=>new Date().toLocaleDateString('en-CA');
+let arcadeLedger={date:arcadeDay(),earned:0,runs:0,bestClassic:0,bestMercy:0,levelClassic:0,levelMercy:0};
+try{const old=JSON.parse(localStorage.getItem(arcadeKey)||'null');if(old&&typeof old==='object')arcadeLedger={...arcadeLedger,...old};}catch(e){}
+const arcadeSeen=new Set();
+function arcadeSave(){try{localStorage.setItem(arcadeKey,JSON.stringify(arcadeLedger))}catch(e){console.warn('Arcade save failed',e)}}
+function arcadeDisplay(){if(arcadeLedger.date!==arcadeDay()){arcadeLedger.date=arcadeDay();arcadeLedger.earned=0;arcadeSave()}
+ const remain=Math.max(0,150-arcadeLedger.earned);
+ $('sv-arcade-records').textContent=`CLASSIC: ${arcadeLedger.bestClassic.toLocaleString()} points / Level ${arcadeLedger.levelClassic} • NO MERCY: ${arcadeLedger.bestMercy.toLocaleString()} points / Level ${arcadeLedger.levelMercy} • ${arcadeLedger.runs} completed runs`;
+ if(!$('sv-arcade-reward').dataset.last)$('sv-arcade-reward').textContent=`Heat Stack SV earned today: ${arcadeLedger.earned}/150 • ${remain} SV available`;
+}
+document.querySelector('[data-page="arcade"]').addEventListener('click',arcadeDisplay);
+window.addEventListener('message',event=>{
+ const frame=$('sv-arcade-frame');
+ if(event.source!==frame.contentWindow || event.origin!=='null' && event.origin!==location.origin)return;
+ const m=event.data;
+ if(!m||m.type!=='sv-heatstack-finished'||!Number.isSafeInteger(m.runId)||m.runId<1||arcadeSeen.has(m.runId))return;
+ if(!['classic','mercy'].includes(m.mode)||!Number.isFinite(m.score)||m.score<0||m.score>100000000||!Number.isInteger(m.level)||m.level<1||m.level>10000||!Number.isInteger(m.drops)||m.drops<1)return;
+ arcadeSeen.add(m.runId);arcadeDisplay();
+ const isMercy=m.mode==='mercy', scoreKey=isMercy?'bestMercy':'bestClassic',levelKey=isMercy?'levelMercy':'levelClassic';
+ arcadeLedger.runs++;arcadeLedger[scoreKey]=Math.max(arcadeLedger[scoreKey],Math.floor(m.score));arcadeLedger[levelKey]=Math.max(arcadeLedger[levelKey],m.level);
+ const raw=Math.min(isMercy?60:40,Math.floor(m.score/180)+(isMercy?10:5));
+ const payout=Math.min(Math.max(0,raw),Math.max(0,150-arcadeLedger.earned));
+ arcadeLedger.earned+=payout;arcadeSave();
+ const xpGain=Math.min(90,Math.max(10,Math.floor(m.score/140)+(isMercy?15:5)));
+ let xpLedger={total:0};try{xpLedger=JSON.parse(localStorage.getItem('solevault_v196_xp')||'{}')||{total:0}}catch(e){}
+ xpLedger.total=Math.max(0,Math.floor(Number(xpLedger.total)||0))+xpGain;
+ try{localStorage.setItem('solevault_v196_xp',JSON.stringify(xpLedger))}catch(e){}
+ if(typeof updateCollector==='function')updateCollector();
+ window.dispatchEvent(new CustomEvent('sv-arcade-xp',{detail:{sv:payout,xp:xpGain,mode:isMercy?'NO MERCY':'CLASSIC'}}));
+ if(payout>0){state.balance+=payout;persist();balance()}
+ $('sv-arcade-reward').dataset.last='1';$('sv-arcade-reward').textContent=`${isMercy?'NO MERCY':'CLASSIC'} complete • Score ${Math.floor(m.score).toLocaleString()} • +${payout} SV${payout===0?' (daily cap reached)':''} • +${xpGain} XP • ${arcadeLedger.earned}/150 earned today`;
+ arcadeDisplay();
+});
+arcadeDisplay();
+
+// In-game virtual balance is local-only, not secure for competitive trading or real-money use.
+balance();tierUi();page('home');
+})();
+</script><style id="sv196style">.sv-arcade-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:14px 0}.sv-arcade-tabs button{background:#152719;color:#d7eacb;border:1px solid #476b43;border-radius:11px;padding:12px 4px;font-size:clamp(9px,2.6vw,12px);font-weight:900}.sv-arcade-tabs button.selected{background:#baff43;color:#0c170b;border-color:#baff43}#sv-arcade-earn-pane[hidden],#sv-heat-pane[hidden]{display:none!important}#sv-arcade-progress{margin-bottom:12px;line-height:1.6}</style>
+<script id="sv196logic">(function(){
+ const arcade=document.getElementById('sv-arcade'),earn=document.getElementById('sv-earn'),pane=document.getElementById('sv-arcade-earn-pane'),heat=document.getElementById('sv-heat-pane');
+ if(!arcade||!earn||!pane||!heat)return;
+ // Move the existing Earn SV DOM without rebuilding it: preserve all bound event listeners and game state.
+ pane.appendChild(earn);earn.classList.add('active');earn.style.display='block';
+ const originalShow=earn.style.display;
+ const progress=document.getElementById('sv-arcade-progress');
+ function showTab(tab){const isHeat=tab==='heat';heat.hidden=!isHeat;pane.hidden=isHeat;earn.style.display=isHeat?'none':originalShow;
+ const quests=earn.querySelector('.earn-head')?.closest('.svpanel');const match=earn.querySelector('#match-grid')?.closest('.svpanel');
+ // Match panel and daily quest panel remain under their original parent.
+ if(quests)quests.style.display=tab==='quests'?'':'none';if(match)match.style.display=tab==='match'?'':'none';
+ document.querySelectorAll('[data-arcade-tab]').forEach(b=>b.classList.toggle('selected',b.dataset.arcadeTab===tab));
+ if(tab==='quests'||tab==='match')document.querySelector('[data-page="earn"]')?.click();
+ }
+ document.querySelectorAll('[data-arcade-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.arcadeTab)));
+ function refreshProgress(detail){let xp=0;try{xp=Math.max(0,Math.floor(JSON.parse(localStorage.getItem('solevault_v196_xp')||'{}').total||0))}catch(e){}
+ const base=typeof collectorXpTotal==='function'?collectorXpTotal():0;const total=base+xp;
+ progress.textContent=(detail?`${detail.mode} COMPLETE • +${detail.sv} SV • +${detail.xp} XP | `:'')+`COLLECTOR LEVEL ${1+Math.floor(total/500)} • ${total%500}/500 XP TO NEXT LEVEL • ARCADE BONUS XP ${xp}`;
+ }
+ window.addEventListener('sv-arcade-xp',e=>refreshProgress(e.detail));document.querySelector('[data-page="arcade"]')?.addEventListener('click',()=>refreshProgress());
+ showTab('heat');refreshProgress();
+})();</script><style id="sv197style">
+#sv-loyalty{margin:18px 0;border:1px solid #51783c;border-radius:18px;background:linear-gradient(145deg,#172719,#0b130e);padding:18px;color:#e9f8e2;font-family:system-ui,sans-serif}
+#sv-loyalty h2{margin:5px 0 8px;color:#baff43;letter-spacing:.07em;font-size:22px}#sv-loyalty p{color:#b7c9b2;line-height:1.5}#sv-loyalty .loyal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}#sv-loyalty .loyal-stat{background:#213424;border:1px solid #385d37;border-radius:12px;text-align:center;padding:12px 4px}#sv-loyalty .loyal-stat strong{display:block;color:#baff43;font-size:24px}#sv-loyalty .loyal-stat small{font-size:10px;color:#b8cdb3}#sv-loyalty button{width:100%;padding:15px;background:#baff43;color:#102009;border:0;border-radius:12px;font-weight:900;font-size:15px}#sv-loyalty button:disabled{opacity:.55}#sv-loyalty .loyal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0}#sv-loyalty .loyal-tile{background:#18291d;border:1px solid #365639;border-radius:10px;text-align:center;padding:11px 3px;font-size:11px}#sv-loyalty .loyal-tile b{display:block;font-size:16px;color:#baff43}#sv-loyalty .loyal-tile.earned{background:#2d4424;border-color:#baff43}#sv-loyalty .loyal-note{font-size:12px;color:#b6c7b2}
+</style>
+<script id="sv197logic">(()=>{
+'use strict';
+const KEY='solevault_v197_loyalty';
+const vault=document.getElementById('sv-vault');if(!vault)return;
+const panel=document.createElement('section');panel.id='sv-loyalty';panel.innerHTML=`<div style="font-size:11px;color:#baff43;letter-spacing:.2em">SOLEVAULT // COLLECTOR LOYALTY</div><h2>👑 LOYALTY LOCKER</h2><p>Show up, play your way, and earn permanent loyalty badges. One grace day per seven-day streak cycle.</p><div class="loyal-stats"><div class="loyal-stat"><strong id="loyal-streak">0</strong><small>CURRENT STREAK</small></div><div class="loyal-stat"><strong id="loyal-days">0</strong><small>TOTAL CHECK-INS</small></div><div class="loyal-stat"><strong id="loyal-grace">1</strong><small>GRACE AVAILABLE</small></div></div><button id="loyal-claim">CHECK IN TODAY</button><p id="loyal-status" aria-live="polite"></p><div class="loyal-grid" id="loyal-milestones"></div><p class="loyal-note">7 days: Day One badge • 30 days: Dedicated badge • 90 days: Veteran badge • 365 days: Legend badge. Exclusive sneaker models are planned, not yet awarded. All progress is local to this browser.</p>`;
+const first=vault.querySelector('.svpanel');if(first)first.after(panel);else vault.prepend(panel);
+const $=id=>document.getElementById(id);
+function ordinal(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());return Math.round((Date.UTC(x.getFullYear(),x.getMonth(),x.getDate())-Date.UTC(1970,0,1))/86400000)}
+function today(){return ordinal(new Date())}
+function load(){let v={};try{v=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}return {last:Number.isInteger(v.last)?v.last:null,streak:Math.max(0,Math.floor(Number(v.streak)||0)),total:Math.max(0,Math.floor(Number(v.total)||0)),graceUsed:!!v.graceUsed,best:Math.max(0,Math.floor(Number(v.best)||0))}}
+let data=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){$('loyal-status').textContent='Storage unavailable. Check-in could not be saved.';return false}return true}
+function effective(){if(data.last===null)return 0;const gap=today()-data.last;if(gap<=1)return data.streak;if(gap===2&&!data.graceUsed)return data.streak;return 0}
+function render(){const gap=data.last===null?999:today()-data.last;const st=effective();$('loyal-streak').textContent=st;$('loyal-days').textContent=data.total;$('loyal-grace').textContent=data.graceUsed?'0':'1';$('loyal-claim').disabled=gap<=0;$('loyal-claim').textContent=gap<=0?'✓ CHECKED IN TODAY':'CHECK IN TODAY';$('loyal-status').textContent=gap<=0?'Today is counted. Come back tomorrow.':gap===2&&!data.graceUsed?'You missed a day. Your grace day can protect this streak.':'Your next check-in is ready.';$('loyal-milestones').innerHTML=[[7,'DAY ONE'],[30,'DEDICATED'],[90,'VETERAN'],[365,'LEGEND']].map(([n,name])=>`<div class="loyal-tile ${data.best>=n?'earned':''}"><b>${data.best>=n?'✓':n}</b>${name}</div>`).join('')}
+$('loyal-claim').addEventListener('click',()=>{const now=today(),gap=data.last===null?999:now-data.last;if(gap<=0)return;const carry=gap===1||(gap===2&&!data.graceUsed);if(!carry){data.streak=0;data.graceUsed=false}if(gap===2&&carry)data.graceUsed=true;data.streak++;data.total++;data.last=now;data.best=Math.max(data.best,data.streak);if(data.streak%7===0)data.graceUsed=false;if(save())render()});
+document.querySelector('[data-page="vault"]')?.addEventListener('click',render);render();
+})();</script>
+<style id="sv198style">
+#sv-backup{margin:22px 0;padding:22px 18px;background:linear-gradient(145deg,#15271a,#0a140e);border:1px solid #476b36;border-radius:22px;color:#eef8e7}
+#sv-backup h2{font-size:24px;color:#baff43;margin:6px 0 10px}
+#sv-backup p{font-size:13px;color:#b7c9b2;line-height:1.55}
+#sv-backup .sv-backup-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+#sv-backup button{padding:13px 8px;border-radius:12px;border:1px solid #baff43;background:#baff43;color:#11200b;font-weight:900;font-size:13px;cursor:pointer}
+#sv-backup button.secondary{background:#1d3320;color:#baff43}
+#sv-backup button:disabled{opacity:.5}
+#sv-backup #sv-backup-status{color:#c9e5bd;overflow-wrap:anywhere}
+#sv-backup .sv-backup-preview{border:1px solid #466344;border-radius:12px;padding:12px;margin-top:12px;display:none}
+</style>
+<script id="sv198backup">(()=>{
+'use strict';
+const KEYS=['solevault_v15_collection','solevault_v193_economy','solevault_v1943_paid_drop','solevault_v194_earn','solevault_v195_arcade','solevault_v196_xp','solevault_v197_loyalty','solevault_v19_collector','sv_heatstack3_best'];
+const vault=document.getElementById('sv-vault');if(!vault)return;
+const panel=document.createElement('section');panel.id='sv-backup';
+panel.innerHTML='<div style="font-size:11px;color:#baff43;letter-spacing:.2em">SOLEVAULT // COLLECTION SECURITY</div><h2>🛡️ BACKUP & RESTORE — V19.8.1</h2><p>Save your sneakers, SV, XP, paid drop, arcade records, and loyalty progress to a file. You can also restore the original V19.6 recovery export. Keep that file somewhere safe. Backups are not automatic or cloud synced.</p><div class="sv-backup-actions"><button type="button" id="sv-backup-export">⬇ SAVE BACKUP</button><button type="button" class="secondary" id="sv-backup-import">⬆ RESTORE FILE</button></div><input id="sv-backup-file" type="file" accept=".json,application/json" hidden><div id="sv-backup-preview" class="sv-backup-preview"></div><p id="sv-backup-status" role="status" aria-live="polite">No backup has been made in this session.</p>';
+const first=vault.querySelector('.svpanel');if(first)first.before(panel);else vault.prepend(panel);
+const $=id=>document.getElementById(id),status=$('sv-backup-status');
+$('sv-backup-export').onclick=()=>{try{
+ const entries={};for(const key of KEYS){const value=localStorage.getItem(key);if(value!==null)entries[key]=value}
+ if(!Object.keys(entries).length)throw Error('No saved SOLEVAULT data was found in this browser.');
+ const data={format:'solevault-local-backup',version:1,createdAt:new Date().toISOString(),entries};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='SOLEVAULT-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ status.textContent='Backup prepared ('+Object.keys(entries).length+' saved records). Check your Downloads and keep the file safe.';
+ }catch(e){status.textContent='Backup failed: '+e.message}};
+ $('sv-backup-import').onclick=()=>$('sv-backup-file').click();
+ $('sv-backup-file').onchange=async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;
+ const preview=$('sv-backup-preview');preview.style.display='none';preview.replaceChildren();
+ try{if(file.size>2_000_000)throw Error('Backup file is unexpectedly large (over 2 MB).');
+ const data=JSON.parse(await file.text());const recovery=data&&data.format==='SOLEVAULT-recovery'&&data.version===1&&data.source==='V19.6';
+ const standard=data&&data.format==='solevault-local-backup'&&data.version===1;
+ if(!recovery&&!standard)throw Error('Not a supported SOLEVAULT backup file.');
+ const entries=recovery?data.localStorage:data.entries;
+ if(!entries||typeof entries!=='object'||Array.isArray(entries))throw Error('Backup records are missing.');
+ const keys=Object.keys(entries);if(!keys.length||keys.some(k=>!KEYS.includes(k)||typeof entries[k]!=='string'))throw Error('Backup contains invalid or unsupported records.');
+ for(const k of keys){if(k!=='sv_heatstack3_best')JSON.parse(entries[k]);}
+ const when=typeof (recovery?data.exportedAt:data.createdAt)==='string'?(recovery?data.exportedAt:data.createdAt).slice(0,19).replace('T',' '):'Unknown';
+ let sneakerCount='unknown',svBalance='unknown';
+ try{const a=JSON.parse(entries.solevault_v15_collection);if(Array.isArray(a))sneakerCount=a.length}catch(_){}
+ try{const a=JSON.parse(entries.solevault_v193_economy);if(Number.isFinite(a.balance))svBalance=a.balance}catch(_){}
+ if(recovery&&(sneakerCount!=='18'&&sneakerCount!==18))throw Error('Original recovery file must show 18 sneakers before import.');
+ const info=document.createElement('p');info.textContent='Backup date: '+when+' · '+keys.length+' saved records · '+sneakerCount+' sneakers · '+svBalance+' SV. Restoring replaces the corresponding current records in this browser. Other saved records will be left untouched.';
+ const btn=document.createElement('button');btn.type='button';btn.textContent='CONFIRM RESTORE & RELOAD';
+ const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='CANCEL';
+ const row=document.createElement('div');row.className='sv-backup-actions';row.append(btn,cancel);preview.append(info,row);preview.style.display='block';
+ cancel.onclick=()=>{preview.style.display='none';status.textContent='Restore cancelled.'};
+ btn.onclick=()=>{if(!confirm('Restore this backup? It will overwrite the matching current SOLEVAULT saves. Export your current save first if you want to keep it.'))return;
+ try{const before={};for(const k of keys)before[k]=localStorage.getItem(k);
+ try{for(const k of keys)localStorage.setItem(k,entries[k])}catch(err){for(const k of keys){try{if(before[k]===null)localStorage.removeItem(k);else localStorage.setItem(k,before[k])}catch(_){}}throw err}
+ status.textContent='Restore complete. Reloading game…';location.reload();
+ }catch(err){status.textContent='Restore failed; original data was retained where possible: '+err.message}}
+ ;
+ status.textContent='Backup validated. Review its date and confirm before restoring.';
+ }catch(err){status.textContent='Cannot restore: '+err.message}
+ };
+})();</script>
+<style id="sv199-trophy-style">
+#sv-trophies{margin:20px 0;padding:19px;border:1px solid #8caa4b;border-radius:22px;background:radial-gradient(circle at 90% 0%,#34452b,#111d15 45%,#08100b);color:#f3ffe9}
+#sv-trophies .trophy-kicker{font-size:10px;color:#baff43;letter-spacing:3px;font-weight:900}
+#sv-trophies h2{font-size:clamp(24px,6vw,32px);margin:8px 0;color:#d8ff94}
+#sv-trophies p{font-size:12px;color:#b9cbb1;line-height:1.6}
+#sv-trophies .trophy-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:17px 0}
+#sv-trophies .trophy-stat{padding:12px 5px;border:1px solid #415c3d;background:#09130c;border-radius:12px;text-align:center}
+#sv-trophies .trophy-stat strong{font-size:22px;color:#baff43;display:block}
+#sv-trophies .trophy-stat small{font-size:9px;color:#a6b9a1;letter-spacing:1px}
+#sv-trophies .trophy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#sv-trophies .trophy-card{position:relative;min-height:154px;padding:14px 9px;border-radius:16px;border:1px solid #465344;background:linear-gradient(150deg,#1e2a20,#101811);text-align:center;opacity:.68}
+#sv-trophies .trophy-card.unlocked{opacity:1;border-color:#baff43;background:linear-gradient(150deg,#304326,#122017);box-shadow:inset 0 0 25px #baff4312}
+#sv-trophies .trophy-icon{font-size:39px;filter:grayscale(1)}#sv-trophies .unlocked .trophy-icon{filter:none}
+#sv-trophies .trophy-card b{display:block;margin-top:8px;font-size:12px;color:#f2ffeb}
+#sv-trophies .trophy-card small{display:block;color:#adc6a4;margin-top:5px;font-size:10px}
+#sv-trophies .trophy-card .trophy-state{color:#baff43;font-weight:900;font-size:10px;margin-top:9px}
+#sv-trophies .trophy-divider{border-top:1px solid #486341;margin:18px 0}
+#sv-trophies .trophy-highlight{padding:13px;background:#0a150e;border-radius:13px;border:1px solid #435d3e;font-size:12px;color:#d5ebc9}
+@media(max-width:360px){#sv-trophies{padding:12px}#sv-trophies .trophy-grid{gap:7px}}
+</style>
+<script id="sv199-trophy-logic">(()=>{
+'use strict';
+const vault=document.getElementById('sv-vault');if(!vault)return;
+const panel=document.createElement('section');panel.id='sv-trophies';panel.setAttribute('aria-label','Collector Trophy Room');
+panel.innerHTML='<div class="trophy-kicker">SOLEVAULT // HALL OF HEAT</div><h2>🏆 SIGNATURE BADGE SHOWCASE</h2><p>Every pull counts. Your trophies unlock from existing collection and loyalty records. This gallery never changes your save.</p><div class="trophy-stats"><div class="trophy-stat"><strong id="tr-pairs">—</strong><small>PAIRS</small></div><div class="trophy-stat"><strong id="tr-styles">—</strong><small>STYLES</small></div><div class="trophy-stat"><strong id="tr-days">—</strong><small>CHECK-INS</small></div></div><div class="trophy-grid" id="tr-grid"></div><div class="trophy-divider"></div><div class="trophy-highlight" id="tr-note">Trophies reflect the progress saved in this browser.</div><p>Milestone rewards are visual achievements only. Exclusive sneakers and SV payouts are not awarded in this version.</p>';
+const loyalty=document.getElementById('sv-loyalty');if(loyalty)loyalty.after(panel);else vault.prepend(panel);
+const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}};
+function render(){
+ const raw=read('solevault_v15_collection',[]);
+ const pairs=Array.isArray(raw)?raw:Array.isArray(raw?.pulls)?raw.pulls:Array.isArray(raw?.collection)?raw.collection:[];
+ const styles=new Set(pairs.map(p=>p?.type).filter(Boolean));
+ const loyal=read('solevault_v197_loyalty',{});
+ const days=Math.max(0,Number(loyal.total)||0),best=Math.max(0,Number(loyal.best)||0);
+ document.getElementById('tr-pairs').textContent=pairs.length;
+ document.getElementById('tr-styles').textContent=styles.size||'—';
+ document.getElementById('tr-days').textContent=days;
+ const achievements=[
+  ['👟','FIRST PAIR','Collect your first sneaker',pairs.length>=1],
+  ['📦','BOX HUNTER','Collect 10 pairs',pairs.length>=10],
+  ['💎','VAULT VETERAN','Collect 25 pairs',pairs.length>=25],
+  ['🔥','HEAT LEGEND','Collect 50 pairs',pairs.length>=50],
+  ['🌱','DAY ONE','Reach a 7-day loyalty streak',best>=7],
+  ['⚡','DEDICATED','Reach a 30-day loyalty streak',best>=30],
+  ['🏅','VETERAN','Reach a 90-day loyalty streak',best>=90],
+  ['👑','LEGEND','Reach a 365-day loyalty streak',best>=365],
+  ['⚡','SOLE IMMORTAL','Collect 50 pairs and reach a 365-day loyalty streak',pairs.length>=50&&best>=365]
+ ];
+ const emblems=[
+ '<path d="M12 57 L17 43 L30 40 L38 21 L53 21 L59 35 L72 42 L88 45 Q94 48 93 56 L93 66 L16 66 Q10 64 12 57Z"/><path d="M20 57 H88 M17 62 H91 M39 28 H53 M37 34 H55 M34 40 H57 M43 46 H63 M69 48 L76 51"/>',
+ '<path d="M15 36 L50 19 L85 36 L85 74 L50 91 L15 74Z"/><path d="M15 36 L50 54 L85 36 M50 54 V91 M34 27 L69 45"/>',
+ '<path d="M50 10 L81 31 L73 77 L50 93 L27 77 L19 31Z"/><path d="M35 37 L50 23 L65 37 L59 67 L50 76 L41 67Z M35 51 H65"/>',
+ '<path d="M52 10 C66 32 37 38 61 55 C70 44 72 34 72 34 C89 63 71 90 49 91 C20 91 14 63 35 43 C34 61 48 60 52 10Z"/><path d="M50 54 C61 68 58 81 48 81 C36 81 37 68 50 54Z"/>',
+ '<path d="M50 13 L59 37 L85 37 L65 54 L72 80 L50 65 L28 80 L35 54 L15 37 L41 37Z"/><path d="M50 25 V61"/>',
+ '<path d="M50 10 L62 37 L90 43 L70 62 L74 88 L50 75 L26 88 L30 62 L10 43 L38 37Z"/><path d="M50 24 V70 M31 52 H69"/>',
+ '<path d="M25 24 H75 V53 Q75 75 50 86 Q25 75 25 53Z"/><path d="M25 34 H13 V47 Q13 59 30 61 M75 34 H87 V47 Q87 59 70 61 M39 41 L50 31 L61 41 L57 60 H43Z"/>',
+ '<path d="M17 38 L32 51 L42 23 L50 45 L59 23 L68 51 L83 38 L76 75 H24Z"/><path d="M25 81 H75 M32 65 H68"/>',
+ '<path d="M50 7 L62 29 L85 19 L78 47 L94 61 L68 68 L50 94 L32 68 L6 61 L22 47 L15 19 L38 29Z"/><path d="M27 60 L40 52 L47 35 L61 42 L73 57 L66 67 H29Z M39 59 H65 M46 46 L57 50 M43 51 L55 55"/>'
+ ];
+ const metals=['#b8d6ad','#c0e9a5','#a6c8ff','#ffad62','#b7cfaa','#84dcff','#d8a6ff','#ffd46b','#f5d079'];
+ const glows=['#5c9e61','#a1e83e','#638cdd','#e95a20','#6b9c52','#1f94bf','#8a52d1','#bf8727','#c1a02e'];
+ document.getElementById('tr-grid').innerHTML=achievements.map(([icon,name,detail,ok],i)=>'<div class="trophy-card '+(ok?'unlocked':'')+'" style="--badge-metal:'+metals[i]+';--badge-glow:'+glows[i]+'"><div class="badge-3d" aria-hidden="true"><div class="badge-shadow"></div><div class="badge-shell"></div><div class="badge-face"><svg viewBox="0 0 100 100">'+emblems[i]+'</svg></div><i class="badge-rivet a"></i><i class="badge-rivet b"></i></div><div class="badge-tier">'+(i<4?'COLLECTION':'LOYALTY')+'</div><b>'+name+'</b><small>'+detail+'</small><div class="trophy-state">'+(ok?'◆ UNLOCKED':'◇ LOCKED')+'</div></div>').join('');
+ const earned=achievements.filter(a=>a[3]).length;
+ document.getElementById('tr-note').textContent=earned+' / '+achievements.length+' trophies unlocked • Best loyalty streak: '+best+' days • All achievements calculated from local saves.';
+}
+render();document.querySelector('[data-page="vault"]')?.addEventListener('click',render);
+const cinema=document.createElement('div');cinema.id='sv-badge-cinema';cinema.setAttribute('role','dialog');cinema.setAttribute('aria-modal','true');cinema.setAttribute('aria-label','Achievement badge reveal');cinema.innerHTML='<div class="immortal-rays"></div><button class="cinema-close" type="button" aria-label="Close badge reveal">✕</button><div class="cinema-kicker">SOLEVAULT // HALL OF HEAT</div><div class="cinema-badge"></div><div class="cinema-label">ACHIEVEMENT UNLOCKED</div><h2 class="cinema-name"></h2><p class="cinema-detail"></p>';
+document.body.appendChild(cinema);
+function closeCinema(){cinema.classList.remove('show');document.body.style.overflow=''}
+cinema.querySelector('.cinema-close').onclick=closeCinema;
+cinema.addEventListener('click',e=>{if(e.target===cinema)closeCinema()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCinema()});
+document.getElementById('tr-grid').addEventListener('click',e=>{const card=e.target.closest('.trophy-card.unlocked');if(!card)return;cinema.querySelector('.cinema-badge').innerHTML=card.querySelector('.badge-3d').outerHTML;cinema.querySelector('.cinema-name').textContent=card.querySelector('b').textContent;cinema.querySelector('.cinema-detail').textContent=card.querySelector('small').textContent;cinema.classList.toggle('immortal',cinema.querySelector('.cinema-name').textContent==='SOLE IMMORTAL');cinema.classList.remove('show');void cinema.offsetWidth;cinema.classList.add('show');document.body.style.overflow='hidden'});
+
+})();</script><style id="sv200-sculpted-badges">
+#sv-trophies .trophy-grid{gap:14px}
+#sv-trophies .trophy-card{min-height:224px;padding:16px 8px 13px;overflow:hidden;opacity:1;background:radial-gradient(circle at 50% 27%,#344032,#101a13 72%);border-color:#38483a;perspective:650px}
+#sv-trophies .trophy-card.unlocked{background:radial-gradient(circle at 50% 28%,#3b4b32,#101b13 75%);border-color:#91bb5d}
+#sv-trophies .badge-3d{position:relative;width:112px;height:112px;margin:0 auto 10px;transform-style:preserve-3d;transform:rotateX(13deg) rotateY(-14deg);transition:transform .45s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(8px 13px 7px #0009)}
+#sv-trophies .trophy-card.unlocked .badge-3d{animation:badge-float 4s ease-in-out infinite}
+#sv-trophies .badge-shadow{position:absolute;inset:8px;border-radius:27%;background:#050806;transform:translate(9px,10px);box-shadow:0 7px 0 #040704}
+#sv-trophies .badge-shell{position:absolute;inset:6px;clip-path:polygon(50% 0%,89% 14%,100% 48%,81% 88%,50% 100%,19% 88%,0 48%,11% 14%);background:linear-gradient(125deg,#fff6cf 0%,var(--badge-metal) 20%,#20231b 46%,var(--badge-metal) 70%,#fff4c5 100%);box-shadow:inset 0 0 12px #fff8}
+#sv-trophies .badge-face{position:absolute;inset:13px;clip-path:polygon(50% 0%,89% 14%,100% 48%,81% 88%,50% 100%,19% 88%,0 48%,11% 14%);background:radial-gradient(circle at 35% 22%,var(--badge-glow),#121a17 68%);border:1px solid #ffffff55;display:grid;place-items:center}
+#sv-trophies .badge-face:after{content:'';position:absolute;inset:5px;clip-path:inherit;border:1px solid #ffffff55;background:linear-gradient(130deg,#ffffff36,transparent 40%);pointer-events:none}
+#sv-trophies .badge-face svg{width:61px;height:61px;fill:none;stroke:#f6ffe8;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 2px #000) drop-shadow(0 0 7px var(--badge-glow))}
+#sv-trophies .badge-rivet{position:absolute;width:5px;height:5px;background:#f8ffe4;border-radius:50%;box-shadow:0 0 5px #fff;z-index:2}
+#sv-trophies .badge-rivet.a{top:18px;left:50%}#sv-trophies .badge-rivet.b{bottom:19px;left:50%}
+#sv-trophies .trophy-card:not(.unlocked) .badge-3d{filter:grayscale(1) brightness(.48) drop-shadow(5px 9px 4px #000a)}
+#sv-trophies .trophy-card b{font-size:12px;letter-spacing:.7px;margin-top:5px}
+#sv-trophies .trophy-card .trophy-state{font-size:10px;letter-spacing:1px}
+#sv-trophies .badge-tier{font-size:9px;color:var(--badge-metal);font-weight:950;letter-spacing:2px;margin:5px 0}
+@keyframes badge-float{0%,100%{transform:rotateX(13deg) rotateY(-14deg) translateY(0)}50%{transform:rotateX(10deg) rotateY(13deg) translateY(-4px)}}
+@media(prefers-reduced-motion:reduce){#sv-trophies .trophy-card.unlocked .badge-3d{animation:none}}
+@media(max-width:370px){#sv-trophies .badge-3d{width:94px;height:94px}#sv-trophies .badge-face svg{width:50px;height:50px}}
+</style><style id="sv201-signature-badges">
+/* Signature sculpted badges with distinct silhouettes and premium tier materials */
+#sv-trophies .trophy-card{cursor:default}
+#sv-trophies .trophy-card.unlocked{cursor:pointer}
+#sv-trophies .trophy-card.unlocked:active{transform:scale(.98)}
+#sv-trophies .trophy-card:nth-child(2) .badge-shell,#sv-trophies .trophy-card:nth-child(2) .badge-face{clip-path:polygon(50% 0,94% 25%,94% 75%,50% 100%,6% 75%,6% 25%)}
+#sv-trophies .trophy-card:nth-child(3) .badge-shell,#sv-trophies .trophy-card:nth-child(3) .badge-face{clip-path:polygon(50% 0,88% 14%,95% 60%,50% 100%,5% 60%,12% 14%)}
+#sv-trophies .trophy-card:nth-child(4) .badge-shell,#sv-trophies .trophy-card:nth-child(4) .badge-face{clip-path:polygon(50% 0,66% 22%,94% 12%,82% 46%,100% 72%,64% 73%,50% 100%,36% 73%,0 72%,18% 46%,6% 12%,34% 22%)}
+#sv-trophies .trophy-card:nth-child(5) .badge-shell,#sv-trophies .trophy-card:nth-child(5) .badge-face{clip-path:polygon(50% 0,91% 20%,91% 75%,50% 100%,9% 75%,9% 20%)}
+#sv-trophies .trophy-card:nth-child(6) .badge-shell,#sv-trophies .trophy-card:nth-child(6) .badge-face{clip-path:polygon(50% 0,61% 18%,83% 9%,81% 36%,100% 50%,81% 64%,83% 91%,61% 82%,50% 100%,39% 82%,17% 91%,19% 64%,0 50%,19% 36%,17% 9%,39% 18%)}
+#sv-trophies .trophy-card:nth-child(7) .badge-shell,#sv-trophies .trophy-card:nth-child(7) .badge-face{clip-path:polygon(50% 0,88% 16%,100% 50%,76% 90%,50% 100%,24% 90%,0 50%,12% 16%)}
+#sv-trophies .trophy-card:nth-child(8) .badge-shell,#sv-trophies .trophy-card:nth-child(8) .badge-face{clip-path:polygon(50% 0,65% 25%,94% 16%,85% 54%,100% 81%,50% 100%,0 81%,15% 54%,6% 16%,35% 25%)}
+#sv-trophies .trophy-card:nth-child(9){grid-column:1/-1;max-width:360px;width:100%;justify-self:center;background:radial-gradient(circle at 50% 25%,#554523,#080d0b 75%);border-color:#b89741}
+#sv-trophies .trophy-card:nth-child(9) .badge-3d{width:146px;height:146px}
+#sv-trophies .trophy-card:nth-child(9) .badge-shell,#sv-trophies .trophy-card:nth-child(9) .badge-face{clip-path:polygon(50% 0,63% 20%,88% 9%,82% 37%,100% 50%,82% 63%,88% 91%,63% 80%,50% 100%,37% 80%,12% 91%,18% 63%,0 50%,18% 37%,12% 9%,37% 20%)}
+#sv-trophies .trophy-card:nth-child(9) .badge-shell{background:linear-gradient(120deg,#fff4bd,#a97720 22%,#0b0c0b 43%,#ffe99c 65%,#7c5514)}
+#sv-trophies .trophy-card:nth-child(9) .badge-face{background:radial-gradient(circle at 50% 35%,#4e5c24,#050807 75%)}
+#sv-trophies .trophy-card:nth-child(9).unlocked .badge-face{box-shadow:0 0 26px #baff43}
+#sv-trophies .trophy-card:nth-child(9) b{font-size:16px;color:#ffe6a3}
+#sv-badge-cinema{display:none;position:fixed;inset:0;z-index:9999999;align-items:center;justify-content:center;flex-direction:column;padding:24px;background:radial-gradient(circle at 50% 40%,#26361d,#030604 70%);overflow:hidden;text-align:center;isolation:isolate}
+#sv-badge-cinema.show{display:flex}
+#sv-badge-cinema .immortal-rays{position:absolute;inset:-60%;background:repeating-conic-gradient(from 0deg,#baff4320 0deg 7deg,transparent 9deg 27deg);animation:sv201-rays 9s linear infinite;pointer-events:none}
+#sv-badge-cinema.immortal .immortal-rays{background:repeating-conic-gradient(from 0deg,#fbd5772c 0deg 7deg,transparent 9deg 27deg)}
+#sv-badge-cinema .cinema-close{position:absolute;top:22px;right:20px;z-index:3;background:#152319;color:#dfffaa;border:1px solid #658746;font-size:17px;padding:9px 14px}
+#sv-badge-cinema .cinema-kicker,#sv-badge-cinema .cinema-label,#sv-badge-cinema .cinema-name,#sv-badge-cinema .cinema-detail{z-index:2;position:relative}
+#sv-badge-cinema .cinema-kicker{color:#baff43;font-size:11px;letter-spacing:3px;font-weight:900}
+#sv-badge-cinema .cinema-badge{position:relative;z-index:2;margin:35px auto 25px;transform:scale(1.65);animation:sv201-reveal 1.1s cubic-bezier(.2,.9,.2,1) both}
+#sv-badge-cinema .cinema-badge .badge-3d{position:relative;width:140px;height:140px;filter:drop-shadow(0 0 20px #baff4380);animation:sv201-turn 5s ease-in-out infinite 1.1s}
+#sv-badge-cinema .cinema-badge .badge-shadow{position:absolute;inset:8px;background:#000;border-radius:27%;transform:translate(8px,9px)}
+#sv-badge-cinema .cinema-badge .badge-shell{position:absolute;inset:6px;clip-path:polygon(50% 0,89% 14%,100% 48%,81% 88%,50% 100%,19% 88%,0 48%,11% 14%);background:linear-gradient(120deg,#fff4bd,var(--badge-metal),#111,#fff1ad)}
+#sv-badge-cinema .cinema-badge .badge-face{position:absolute;inset:14px;clip-path:polygon(50% 0,89% 14%,100% 48%,81% 88%,50% 100%,19% 88%,0 48%,11% 14%);display:grid;place-items:center;background:radial-gradient(circle at 40% 30%,var(--badge-glow),#0b120d 70%)}
+#sv-badge-cinema .cinema-badge svg{width:75px;height:75px;fill:none;stroke:#fffbe8;stroke-width:2.7;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 5px var(--badge-glow))}
+#sv-badge-cinema .cinema-badge .badge-rivet{display:none}
+#sv-badge-cinema .cinema-label{color:#baff43;font-size:13px;letter-spacing:3px;font-weight:950;margin-top:18px}
+#sv-badge-cinema .cinema-name{font-size:clamp(29px,9vw,50px);color:#fff;margin:13px 0}
+#sv-badge-cinema .cinema-detail{color:#c8d9bf;font-size:13px;max-width:320px}
+@keyframes sv201-reveal{from{opacity:0;transform:scale(.2) rotate(-60deg);filter:blur(15px)}65%{opacity:1;transform:scale(1.95) rotate(9deg);filter:blur(0)}to{transform:scale(1.65)}}
+@keyframes sv201-turn{0%,100%{transform:rotateY(-16deg) rotateX(12deg)}50%{transform:rotateY(18deg) rotateX(-8deg)}}
+@keyframes sv201-rays{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){#sv-badge-cinema *{animation:none!important}}
+</style></body></html>
